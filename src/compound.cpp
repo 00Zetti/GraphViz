@@ -78,8 +78,14 @@ string TreeNode::to_string() {
             s << ", ";
         }
     }
-    s << "]";
-    s << ")";
+    s << "], connections: [";
+    for (unsigned int i = 0; i < connections.size(); i++) {
+        s << connections[i].to_string();
+        if (i < connections.size() - 1) {
+            s << ", ";
+        }
+    }
+    s << "])";
 
     return s.str();
 }

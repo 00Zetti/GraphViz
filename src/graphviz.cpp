@@ -19,7 +19,11 @@ int main(int argc, char *argv[])
     NodeId b = com.add_node(root, "B");
     NodeId c = com.add_node(b, "C");
 
-    // print them
+    // add non-hierarchical connections
+    com.add_connection(a, c);
+    com.add_connection(a, root);
+
+    // print the nodes
     cout << com.get_node(root)->to_string() << endl;
     cout << com.get_node(a)->to_string() << endl;
     cout << com.get_node(b)->to_string() << endl;
