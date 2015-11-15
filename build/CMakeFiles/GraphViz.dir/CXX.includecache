@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/martin/Developer/Dev/GraphViz.git/GraphViz/include/compound.h
+vector
+-
+string
+-
+utility
+-
+
+/home/martin/Developer/Dev/GraphViz.git/GraphViz/src/compound.cpp
+../include/compound.h
+/home/martin/Developer/Dev/GraphViz.git/GraphViz/include/compound.h
+iostream
+-
+sstream
+-
+
+/home/martin/Developer/Dev/GraphViz.git/GraphViz/src/graphviz.cpp
+../include/compound.h
+/home/martin/Developer/Dev/GraphViz.git/GraphViz/include/compound.h
+iostream
+-
+

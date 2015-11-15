@@ -1,4 +1,4 @@
-#include "compound.h"
+#include "../include/compound.h"
 
 #include <iostream>
 #include <sstream>
