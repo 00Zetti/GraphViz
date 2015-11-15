@@ -29,3 +29,6 @@ graphviz
 *.exe
 *.out
 *.app
+
+#build directory
+GraphViz/build/
