@@ -188,7 +188,7 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) {
     while (x->id.id != y->id.id) {
         path.nodes.push_back(x->id);
         tail.push_back(y->id);
-        if (x->parent_id.is_invalid() or y->parent_id.is_invalid()) {
+        if (x->parent_id.is_invalid() || y->parent_id.is_invalid()) {
             break;
         } else {
             x = get_node(x->parent_id);

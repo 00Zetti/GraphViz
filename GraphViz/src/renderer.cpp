@@ -21,11 +21,14 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
     glutInitContextProfile(GLUT_CORE_PROFILE);
     glutCreateWindow("GraphViz");
 
+
+
     if(glewInit())
     {
         std::cerr << "Unable to initialize GLEW ... exiting" << std::endl;
         return false;
     }
+
     //set functions for callbacks
     glutDisplayFunc(Renderer::display);
     glutKeyboardFunc(Renderer::keyboard);
@@ -36,7 +39,6 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
 
     //white as clear color
     glClearColor(1.0f,1.0f,1.0f,1.0f);
-
 
     return true;
 }
@@ -52,33 +54,52 @@ bool Renderer::initProgram()
     //Create Shaders
 
     //vertex shader
+
+	//create
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+	//find source
     std::string vertexSource = readFile("../shader/vertexShader.glsl");
     const char* vertexSourceC = vertexSource.c_str();
+
+	//attach source
     glShaderSource(vertexShader,1,&vertexSourceC,NULL);
 
+	//compile
     glCompileShader(vertexShader);
 
+	//print compile progression
     printShaderInfoLog(vertexShader);
 
     //fragmentShader
+
+	//create
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+	//find source
     std::string fragmentSource = readFile("../shader/fragmentShader.glsl");
     const char* fragmentSourceC = fragmentSource.c_str();
+
+	//attach source
     glShaderSource(fragmentShader,1,&fragmentSourceC,NULL);
 
+	//compile
     glCompileShader(fragmentShader);
 
+	//print compile progression
     printShaderInfoLog(fragmentShader);
 
-
+	//define and create program
     GLuint prog = glCreateProgram();
 
+	//attach shader to program
     glAttachShader(prog,vertexShader);
     glAttachShader(prog,fragmentShader);
 
+	//link shader together
     glLinkProgram(prog);
 
+	//use this program
     glUseProgram(prog);
 
     return true;
@@ -86,24 +107,36 @@ bool Renderer::initProgram()
 
 bool Renderer::parseData(Compound *c)
 {
+	//TODO: parse Tree points
+	//TODO: parse Lines
     return true;
 }
 
 void Renderer::run()
 {
-    glMatrixMode(GL_PROJECTION);
+	//dummy MVP
+	glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0,1,0,1,-1,1);
     glMatrixMode(GL_MODELVIEW);
     glViewport(0,0,mWidth,mHeight);
+
+	//run Main Loop
     glutMainLoop();
 }
 
 void Renderer::display()
 {
+
+	//time measurement
     int start = glutGet(GLUT_ELAPSED_TIME);
-    glClear(GL_COLOR_BUFFER_BIT);
+
+	//clear buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//display rendered image
     glutSwapBuffers();
+	//time measurement
     int end = glutGet(GLUT_ELAPSED_TIME);
     mDeltaTime = float(end-start)/1000.0f;
 }
@@ -117,6 +150,7 @@ void Renderer::keyboard(unsigned char key, int x, int y)
 
 void Renderer::mouseButton(int button, int state, int x, int y)
 {
+	//clicked mouseButton
     if(state == GLUT_DOWN)
     {
         if(button == GLUT_LEFT_BUTTON)
@@ -132,6 +166,7 @@ void Renderer::mouseButton(int button, int state, int x, int y)
 
         }
     }
+	//released mouseButton
     else if(state == GLUT_UP)
     {
         if(button == GLUT_LEFT_BUTTON)
@@ -151,19 +186,30 @@ void Renderer::mouseButton(int button, int state, int x, int y)
 
 void Renderer::mouseMotion(int x, int y)
 {
-    //last to call
+
+
+	//zoom in/out, when left mouse button is clicked
+	if (mState == ZOOM)
+	{
+		//TODO: implement zoom
+	}
+	//last to call, force glut to update display
     glutPostRedisplay();
 }
 
 void Renderer::resize(int width,int height)
 {
-    glutReshapeWindow(width,height);
-    //last to call
+	mWidth = width;
+	mHeight = height,
+	//pass parameters to glut
+    glutReshapeWindow(mWidht,mHeight);
+    //last to call, force glut to update display
     glutPostRedisplay();
 }
 
 void Renderer::idle()
 {
+	//last to call, force glut to update display
     glutPostRedisplay();
 }
 
@@ -175,6 +221,7 @@ std::string Renderer::readFile(const std::string &source)
    std::ifstream file(source.c_str());
    if(file.is_open())
    {
+	   //parse file line by line into one string
        while(!file.eof())
        {
            getline(file,line);
@@ -187,12 +234,13 @@ std::string Renderer::readFile(const std::string &source)
    {
        std::cout << "Unable to open file: " << source << std::endl;
    }
-
+   
    return content;
 }
 
 void Renderer::printShaderInfoLog(GLuint shader)
 {
+	//shader == -1 , no Shader attached
     if (shader == -1)
         return;
     GLint infologLength = 0;
