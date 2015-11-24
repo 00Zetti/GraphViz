@@ -72,6 +72,14 @@ bool TreeNode::has_parent() {
     return parent_id.id != 0;
 }
 
+vector<NodeId> TreeNode::get_child_ids() {
+    return children;
+}
+
+vector<ConnId> TreeNode::get_connection_ids() {
+    return connections;
+}
+
 string TreeNode::to_string() {
     stringstream s;
     s << "TreeNode(id: " << id.to_string();

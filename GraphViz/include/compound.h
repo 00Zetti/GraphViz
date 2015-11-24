@@ -65,6 +65,12 @@ class TreeNode {
         // only false for root node
         bool has_parent();
 
+        // possibly expensive as it copies the whole vector of children
+        vector<NodeId> get_child_ids();
+
+        // possibly expensive as it copies the whole vector of connections
+        vector<ConnId> get_connection_ids();
+
         // returns a string representation of the object
         string to_string();
 
