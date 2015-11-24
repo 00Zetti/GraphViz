@@ -12,11 +12,11 @@ NodeId NodeId::invalid() {
     return NodeId(0);
 }
 
-bool NodeId::is_invalid() {
+bool NodeId::is_invalid() const {
     return id == 0;
 }
 
-string NodeId::to_string() {
+string NodeId::to_string() const {
     stringstream s;
     s << "NodeId(";
     if (is_invalid()) {
@@ -33,7 +33,7 @@ string NodeId::to_string() {
 ConnId::ConnId(unsigned int id): id(id) {
 }
 
-string ConnId::to_string() {
+string ConnId::to_string() const {
     stringstream s;
     s << "ConnId(" << id << ")";
 
@@ -41,7 +41,7 @@ string ConnId::to_string() {
 }
 
 
-string Point2D::to_string() {
+string Point2D::to_string() const {
     stringstream s;
     s << "Point2D(" << x << ", " << y << ")";
 
@@ -60,27 +60,31 @@ TreeNode::TreeNode(NodeId id, string label):
     connections(vector<ConnId>()) {
 }
 
-NodeId TreeNode::get_id() {
+NodeId TreeNode::get_id() const {
     return id;
 }
 
-NodeId TreeNode::get_parent_id() {
+NodeId TreeNode::get_parent_id() const {
     return parent_id;
 }
 
-bool TreeNode::has_parent() {
+bool TreeNode::has_parent() const {
     return parent_id.id != 0;
 }
 
-vector<NodeId> TreeNode::get_child_ids() {
+bool TreeNode::is_leaf() const {
+    return children.empty();
+}
+
+vector<NodeId> TreeNode::get_child_ids() const {
     return children;
 }
 
-vector<ConnId> TreeNode::get_connection_ids() {
+vector<ConnId> TreeNode::get_connection_ids() const {
     return connections;
 }
 
-string TreeNode::to_string() {
+string TreeNode::to_string() const {
     stringstream s;
     s << "TreeNode(id: " << id.to_string();
     s << ", level: " << level;
@@ -107,15 +111,15 @@ string TreeNode::to_string() {
     return s.str();
 }
 
-unsigned int TreeNode::get_level() {
+unsigned int TreeNode::get_level() const {
     return level;
 }
 
-unsigned int TreeNode::get_num_leaves() {
+unsigned int TreeNode::get_num_leaves() const {
     return num_leaves;
 }
 
-string TreeNode::get_label() {
+string TreeNode::get_label() const {
     return label;
 }
 
@@ -123,7 +127,7 @@ void TreeNode::set_label(string label) {
     this->label = label;
 }
 
-Point2D TreeNode::get_position() {
+Point2D TreeNode::get_position() const {
     return position;
 }
 
@@ -132,7 +136,7 @@ void TreeNode::set_position(Point2D position) {
 }
 
 
-string Path::to_string() {
+string Path::to_string() const {
     stringstream s;
     s << "Path(nodes: [";
     for (unsigned int i = 0; i < nodes.size(); i++) {
@@ -157,7 +161,7 @@ Compound::~Compound() {
 }
 
 
-NodeId Compound::get_root_id() {
+NodeId Compound::get_root_id() const {
     return nodes.at(0).get_id();
 }
 
@@ -190,6 +194,10 @@ TreeNode* Compound::get_node(NodeId id) {
     return &nodes.at(id.id - 1);
 }
 
+const TreeNode* Compound::get_const_node(NodeId id) const {
+    return &nodes.at(id.id - 1);
+}
+
 void Compound::add_connection(NodeId a, NodeId b) {
     ConnId id = ConnId(connections.size());
     connections.push_back(pair<NodeId, NodeId>(a, b));
@@ -200,15 +208,15 @@ void Compound::add_connection(NodeId a, NodeId b) {
 }
 
 
-pair<NodeId, NodeId> Compound::get_connection(ConnId id) {
+pair<NodeId, NodeId> Compound::get_connection(ConnId id) const {
     return connections.at(id.id);
 }
 
 
-Path Compound::get_shortest_path(NodeId a, NodeId b) {
+Path Compound::get_shortest_path(NodeId a, NodeId b) const {
     Path path;
-    TreeNode *x = get_node(a);
-    TreeNode *y = get_node(b);
+    TreeNode const *x = get_const_node(a);
+    TreeNode const *y = get_const_node(b);
 
     // move up from node a
     while (x->level > y->level) {
@@ -216,7 +224,7 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) {
         if (x->parent_id.is_invalid()) {
             break;
         } else {
-            x = get_node(x->parent_id);
+            x = get_const_node(x->parent_id);
         }
     }
 
@@ -227,7 +235,7 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) {
         if (y->parent_id.is_invalid()) {
             break;
         } else {
-            y = get_node(y->parent_id);
+            y = get_const_node(y->parent_id);
         }
     }
 
@@ -238,8 +246,8 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) {
         if (x->parent_id.is_invalid() || y->parent_id.is_invalid()) {
             break;
         } else {
-            x = get_node(x->parent_id);
-            y = get_node(y->parent_id);
+            x = get_const_node(x->parent_id);
+            y = get_const_node(y->parent_id);
         }
     }
 
@@ -257,3 +265,17 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) {
         return Path();
     }
 }
+
+vector<NodeId> Compound::get_leaf_ids() const {
+    vector<NodeId> leaves;
+
+    for (unsigned int i; i < nodes.size(); i++) {
+        const TreeNode *n = &nodes[i];
+        if (n->is_leaf()) {
+            leaves.push_back(n->id);
+        }
+    }
+
+    return leaves;
+}
+

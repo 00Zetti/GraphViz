@@ -19,9 +19,9 @@ class NodeId {
         // returns an invalid NodeId
         static NodeId invalid();
 
-        bool is_invalid();
+        bool is_invalid() const;
 
-        string to_string();
+        string to_string() const;
 
     private:
         unsigned int id;
@@ -34,7 +34,7 @@ class ConnId {
 
     public:
         explicit ConnId(unsigned int id);
-        string to_string();
+        string to_string() const;
 
     private:
         unsigned int id;
@@ -44,7 +44,7 @@ class ConnId {
 class Point2D {
     public:
         Point2D(float x, float y): x(x), y(y) {};
-        string to_string();
+        string to_string() const;
 
         float x;
         float y;
@@ -57,33 +57,36 @@ class TreeNode {
     public:
         TreeNode(NodeId id, string label="");
 
-        NodeId get_id();
+        NodeId get_id() const;
 
         // returns an invalid NodeId if there is no parent, check with has_parent()
-        NodeId get_parent_id();
+        NodeId get_parent_id() const;
 
         // only false for root node
-        bool has_parent();
+        bool has_parent() const;
+
+        // true if there are no children
+        bool is_leaf() const;
 
         // possibly expensive as it copies the whole vector of children
-        vector<NodeId> get_child_ids();
+        vector<NodeId> get_child_ids() const;
 
         // possibly expensive as it copies the whole vector of connections
-        vector<ConnId> get_connection_ids();
+        vector<ConnId> get_connection_ids() const;
 
         // returns a string representation of the object
-        string to_string();
+        string to_string() const;
 
         // get the level of the node, only the root node has level == 0
-        unsigned int get_level();
+        unsigned int get_level() const;
 
         // get the number of leaves of this node and all its children
-        unsigned int get_num_leaves();
+        unsigned int get_num_leaves() const;
 
-        string get_label();
+        string get_label() const;
         void set_label(string label);
 
-        Point2D get_position();
+        Point2D get_position() const;
         void set_position(Point2D position);
 
 
@@ -102,7 +105,7 @@ class TreeNode {
 // a Path between nodes, possibly spanning over several nodes
 class Path {
     public:
-        string to_string();
+        string to_string() const;
 
         vector<NodeId> nodes;
 };
@@ -117,7 +120,7 @@ class Compound {
         virtual ~Compound();
 
         // get the id of the root node
-        NodeId get_root_id();
+        NodeId get_root_id() const;
 
         // construct a new node, add it to the tree and return its id
         NodeId add_node(NodeId parent, string label="");
@@ -125,13 +128,19 @@ class Compound {
         // return a pointer to a node in the tree
         TreeNode* get_node(NodeId id);
 
+        // return a const pointer to a node in the tree
+        const TreeNode* get_const_node(NodeId id) const;
+
         // add a connection between the nodes a and b
         void add_connection(NodeId a, NodeId b);
 
-        pair<NodeId, NodeId> get_connection(ConnId id);
+        pair<NodeId, NodeId> get_connection(ConnId id) const;
 
         // return the shortest path between the nodes a and b
-        Path get_shortest_path(NodeId a, NodeId b);
+        Path get_shortest_path(NodeId a, NodeId b) const;
+
+        // get the ids of all leaves
+        vector<NodeId> get_leaf_ids() const;
 
     private:
         // nodes have an index of node.id - 1
