@@ -202,7 +202,7 @@ void Renderer::resize(int width,int height)
 	mWidth = width;
 	mHeight = height,
 	//pass parameters to glut
-    glutReshapeWindow(mWidht,mHeight);
+    glutReshapeWindow(mWidth,mHeight);
     //last to call, force glut to update display
     glutPostRedisplay();
 }
