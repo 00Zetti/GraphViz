@@ -40,7 +40,7 @@ class ConnId {
         unsigned int id;
 };
 
-// A Point with two coordinates x and y
+// A Point with two coordinates: x and y
 class Point2D {
     public:
         Point2D(float x, float y): x(x), y(y) {};
@@ -118,6 +118,14 @@ class Compound {
     public:
         Compound();
         virtual ~Compound();
+
+        // create a random Compound graph
+        static Compound create_random(unsigned int max_level,
+                                      unsigned int num_nodes,
+                                      unsigned int avg_num_children,
+                                      unsigned int num_connections);
+
+        string to_string() const;
 
         // get the id of the root node
         NodeId get_root_id() const;
