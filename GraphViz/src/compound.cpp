@@ -41,13 +41,22 @@ string ConnId::to_string() {
 }
 
 
+string Point2D::to_string() {
+    stringstream s;
+    s << "Point2D(" << x << ", " << y << ")";
+
+    return s.str();
+}
+
+
 TreeNode::TreeNode(NodeId id, string label):
     id(id),
     level(0),
-    num_leaves(0),
     parent_id(NodeId::invalid()),
     children(vector<NodeId>()),
+    num_leaves(0),
     label(label),
+    position(Point2D(0, 0)),
     connections(vector<ConnId>()) {
 }
 
@@ -69,6 +78,7 @@ string TreeNode::to_string() {
     s << ", level: " << level;
     s << ", num_leaves: " << num_leaves;
     s << ", label: \"" << label << "\"";
+    s << ", position: " << position.to_string();
     s << ", parent: " << parent_id.to_string();
     s << ", children: [";
     for (unsigned int i = 0; i < children.size(); i++) {
@@ -103,6 +113,14 @@ string TreeNode::get_label() {
 
 void TreeNode::set_label(string label) {
     this->label = label;
+}
+
+Point2D TreeNode::get_position() {
+    return position;
+}
+
+void TreeNode::set_position(Point2D position) {
+    this->position = position;
 }
 
 

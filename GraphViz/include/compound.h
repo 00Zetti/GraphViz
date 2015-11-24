@@ -40,6 +40,15 @@ class ConnId {
         unsigned int id;
 };
 
+// A Point with two coordinates x and y
+class Point2D {
+    public:
+        Point2D(float x, float y): x(x), y(y) {};
+        string to_string();
+
+        float x;
+        float y;
+};
 
 // an Element of a Tree
 class TreeNode {
@@ -68,6 +77,10 @@ class TreeNode {
         string get_label();
         void set_label(string label);
 
+        Point2D get_position();
+        void set_position(Point2D position);
+
+
     private:
         NodeId id;
         unsigned int level;
@@ -75,6 +88,7 @@ class TreeNode {
         vector<NodeId> children;
         unsigned int num_leaves;
         string label;
+        Point2D position;
         vector<ConnId> connections;
 };
 

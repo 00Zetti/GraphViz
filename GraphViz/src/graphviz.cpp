@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 
     NodeId root = com.get_root_id();
     com.get_node(root)->set_label("Root");
+    com.get_node(root)->set_position(Point2D(0.2, 1.5));
 
     // add a child to root and label it
     NodeId a = com.add_node(root, "A");
