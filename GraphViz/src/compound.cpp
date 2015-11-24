@@ -1,5 +1,9 @@
 #include "../include/compound.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include <iostream>
 #include <sstream>
 using namespace std;
@@ -161,6 +165,79 @@ Compound::~Compound() {
 }
 
 
+Compound Compound::create_random(unsigned int max_level,
+                                 unsigned int min_num_nodes,
+                                 unsigned int avg_num_children,
+                                 unsigned int num_connections) {
+
+    Compound com;
+
+    if (max_level < 1) {
+        cerr << "max_level should be >= 1" << endl;
+        return com;
+    }
+
+    if (avg_num_children < 2) {
+        cerr << "avg_num_children should be >= 2" << endl;
+        return com;
+    }
+
+    // Initialize random number generator.
+    // This should ideally be done only once at program start.
+    srand(time(NULL));
+
+    NodeId x = com.get_root_id();
+    while (com.nodes.size() < min_num_nodes) {
+
+        // move down
+        while (com.get_const_node(x)->level < max_level) {
+            x = com.add_node(x);
+        }
+
+        // move up
+        x = com.get_const_node(x)->parent_id;
+        for (int k = 0; k < max_level - 1; k++) {
+            if (rand() % avg_num_children != 0) {
+                break;
+            }
+            x = com.get_const_node(x)->parent_id;
+        }
+    }
+
+    vector<NodeId> leaves = com.get_leaf_ids();
+    unsigned int num_leaves = leaves.size();
+
+    if (num_leaves <= 1) {
+        cerr << "there are not enough leaves to add connections." << endl;
+        return com;
+    }
+
+    while (com.connections.size() < num_connections) {
+        unsigned int a = rand() % num_leaves;
+        unsigned int b = rand() % num_leaves;
+        if (a != b) {
+            com.add_connection(leaves[a], leaves[b]);
+        }
+    }
+
+    return com;
+}
+
+string Compound::to_string() const {
+    stringstream s;
+    s << "Compound(nodes: [\n";
+    for (unsigned int i = 0; i < nodes.size(); i++) {
+        s << nodes[i].to_string();
+        if (i < nodes.size() - 1) {
+            s << ",\n";
+        }
+    }
+    s << "])";
+
+    return s.str();
+}
+
+
 NodeId Compound::get_root_id() const {
     return nodes.at(0).get_id();
 }
@@ -269,7 +346,7 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) const {
 vector<NodeId> Compound::get_leaf_ids() const {
     vector<NodeId> leaves;
 
-    for (unsigned int i; i < nodes.size(); i++) {
+    for (unsigned int i = 0; i < nodes.size(); i++) {
         const TreeNode *n = &nodes[i];
         if (n->is_leaf()) {
             leaves.push_back(n->id);
