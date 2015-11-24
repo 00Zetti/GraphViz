@@ -50,9 +50,6 @@ TreeNode::TreeNode(NodeId id, string label):
     connections(vector<ConnId>()) {
 }
 
-TreeNode::~TreeNode() {
-}
-
 NodeId TreeNode::get_id() {
     return id;
 }
@@ -115,6 +112,7 @@ string Path::to_string() {
 
 
 Compound::Compound() {
+    // add root node
     nodes.push_back(TreeNode(NodeId(1)));
 }
 
@@ -166,6 +164,7 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) {
     TreeNode *x = get_node(a);
     TreeNode *y = get_node(b);
 
+    // move up from node a
     while (x->level > y->level) {
         path.nodes.push_back(x->id);
         if (x->parent_id.is_invalid()) {
@@ -175,6 +174,7 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) {
         }
     }
 
+    // move up from node b
     vector<NodeId> tail;
     while (y->level > x->level) {
         tail.push_back(y->id);
@@ -185,6 +185,7 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) {
         }
     }
 
+    // move up together until we reach a common node
     while (x->id.id != y->id.id) {
         path.nodes.push_back(x->id);
         tail.push_back(y->id);
@@ -206,7 +207,7 @@ Path Compound::get_shortest_path(NodeId a, NodeId b) {
 
         return path;
     } else {
-        // no possible Path
+        // There is no possible path -> return empty Path
         return Path();
     }
 }

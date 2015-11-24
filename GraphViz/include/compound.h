@@ -47,7 +47,6 @@ class TreeNode {
 
     public:
         TreeNode(NodeId id, string label="");
-        virtual ~TreeNode();
 
         NodeId get_id();
 
@@ -109,7 +108,8 @@ class Compound {
         // nodes have an index of node.id - 1
         vector<TreeNode> nodes;
 
-        // adjacency relations, each element represents a connection between two nodes
+        // adjacency relations, each element represents a connection between two nodes.
+        // Index of connections = ConnId.id
         vector<pair<NodeId, NodeId> > connections;
 };
 
