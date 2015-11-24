@@ -44,6 +44,7 @@ string ConnId::to_string() {
 TreeNode::TreeNode(NodeId id, string label):
     id(id),
     level(0),
+    num_leaves(0),
     parent_id(NodeId::invalid()),
     children(vector<NodeId>()),
     label(label),
@@ -66,6 +67,7 @@ string TreeNode::to_string() {
     stringstream s;
     s << "TreeNode(id: " << id.to_string();
     s << ", level: " << level;
+    s << ", num_leaves: " << num_leaves;
     s << ", label: \"" << label << "\"";
     s << ", parent: " << parent_id.to_string();
     s << ", children: [";
@@ -85,6 +87,14 @@ string TreeNode::to_string() {
     s << "])";
 
     return s.str();
+}
+
+unsigned int TreeNode::get_level() {
+    return level;
+}
+
+unsigned int TreeNode::get_num_leaves() {
+    return num_leaves;
 }
 
 string TreeNode::get_label() {
@@ -134,8 +144,18 @@ NodeId Compound::add_node(NodeId parent_id, string label) {
     n.level = get_node(parent_id)->level + 1;
     nodes.push_back(n);
 
-    // add node to parents list of children
+    // add node to parent's list of children
     get_node(parent_id)->children.push_back(id);
+
+    // increment num_leaves of all parents
+    {
+        TreeNode *x = get_node(id);
+        while (x->has_parent()) {
+            x = get_node(x->parent_id);
+
+            x->num_leaves += 1;
+        }
+    }
 
     return id;
 }
