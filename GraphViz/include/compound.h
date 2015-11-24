@@ -80,8 +80,8 @@ class TreeNode {
         // get the level of the node, only the root node has level == 0
         unsigned int get_level() const;
 
-        // get the number of leaves of this node and all its children
-        unsigned int get_num_leaves() const;
+        // get the number of children of this node and all its children
+        unsigned int get_num_children() const;
 
         string get_label() const;
         void set_label(string label);
@@ -95,7 +95,7 @@ class TreeNode {
         unsigned int level;
         NodeId parent_id;
         vector<NodeId> children;
-        unsigned int num_leaves;
+        unsigned int num_children;
         string label;
         Point2D position;
         vector<ConnId> connections;
