@@ -3,19 +3,30 @@ A repository for our scientific seminar 'Applied Visualization and Analysis of m
 
 ## Getting Started
 
+Move to the directory that contains `CMakeLists.txt`:
+```sh
+$ cd GraphViz
+```
+
+Create `build` directory and move there:
+```sh
+$ mkdir build
+$ cd build
+```
+
+Run CMake:
+```sh
+$ cmake -G "Unix Makefiles" ..
+```
+
 Build:
 ```sh
 $ make
 ```
 
-Build and run:
+Run:
 ```sh
-$ make run
-```
-
-Build from scratch:
-```sh
-$ make clean && make
+$ ./GraphViz
 ```
 
 ## Libraries
