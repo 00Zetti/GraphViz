@@ -1,7 +1,9 @@
 #include "../include/renderer.h"
+#include "../include/config.h"
 
 #include <iostream>
 #include <fstream>
+
 
 int Renderer::mWidth = 0;
 int Renderer::mHeight = 0;
@@ -45,6 +47,10 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
 
 bool Renderer::initBuffers()
 {
+    //TODO: init spline and tree buffer,
+
+    //Create VAO
+    //Bind VAO
 
     return true;
 }
@@ -59,7 +65,9 @@ bool Renderer::initProgram()
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 	//find source
-    std::string vertexSource = readFile("../shader/vertexShader.glsl");
+    std::string shaderDir(VIZ_DIR);
+
+    std::string vertexSource = readFile(shaderDir+"/vertexShader.vert");
     const char* vertexSourceC = vertexSource.c_str();
 
 	//attach source
@@ -77,7 +85,7 @@ bool Renderer::initProgram()
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
 	//find source
-    std::string fragmentSource = readFile("../shader/fragmentShader.glsl");
+    std::string fragmentSource = readFile(shaderDir+"/fragmentShader.frag");
     const char* fragmentSourceC = fragmentSource.c_str();
 
 	//attach source
@@ -218,7 +226,8 @@ std::string Renderer::readFile(const std::string &source)
    std::string content;
    std::string line;
 
-   std::ifstream file(source.c_str());
+   std::ifstream file;
+   file.open(source.c_str(),ios_base::in);
    if(file.is_open())
    {
 	   //parse file line by line into one string

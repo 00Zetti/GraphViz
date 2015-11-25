@@ -23,11 +23,30 @@ else (OPENGL_FOUND)
     MESSAGE(ERROR "OpenGL missing.")
 endif(OPENGL_FOUND)
 
+
+#set path to shader files
+set(VIZ_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shader/" CACHE PATH "Path to where the shader files are.")
+
+if(WIN32)
+    string(REPLACE "/" "\\\\" VIZ_DIR ${VIZ_DIR$})
+endif(WIN32)
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/config.h"
+)
+
+MESSAGE("${VIZ_DIR}")
+
+
 #glut stuff
 
 
 aux_source_directory(. SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST}
+
+        #CONFIG
+        config.h.in
 
 	#SOURCE
 	src/compound.cpp
@@ -37,10 +56,11 @@ add_executable(${PROJECT_NAME} ${SRC_LIST}
 	#INCLUDE
 	include/compound.h
         include/renderer.h
+        include/config.h
 
         #SHADER
-        shader/vertexShader.glsl
-        shader/fragmentShader.glsl
+        shader/vertexShader.vert
+        shader/fragmentShader.frag
 )
 
 target_link_libraries(GraphViz ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARIES})

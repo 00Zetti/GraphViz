@@ -86,6 +86,7 @@ private:
 
 	//print Compile Info(Shader)
     static void printShaderInfoLog(GLuint shader);
+
 };
 
 
