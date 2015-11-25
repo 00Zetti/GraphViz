@@ -28,7 +28,7 @@ endif(OPENGL_FOUND)
 set(VIZ_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shader/" CACHE PATH "Path to where the shader files are.")
 
 if(WIN32)
-    string(REPLACE "/" "\\\\" VIZ_DIR ${VIZ_DIR$})
+    string(REPLACE "/" "\\\\" VIZ_DIR ${VIZ_DIR})
 endif(WIN32)
 
 configure_file(
