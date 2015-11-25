@@ -43,7 +43,7 @@ class ConnId {
 // A Point with two coordinates: x and y
 class Point2D {
     public:
-        Point2D(float x, float y): x(x), y(y) {};
+        Point2D(float x, float y): x(x), y(y) {}
         string to_string() const;
 
         float x;

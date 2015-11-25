@@ -3,13 +3,19 @@
 
 #include <iostream>
 #include <fstream>
+#include <math.h>
 
+#define PI 3.141592653589793238462
 
 int Renderer::mWidth = 0;
 int Renderer::mHeight = 0;
 float   Renderer::mDeltaTime = 0.0f;
 Renderer::Camera  Renderer::mCamera;
 Renderer::MOUSESTATE Renderer::mState = IDLE;
+Renderer::Buffer<Point2D> Renderer::mTreeConnectionBuffer;
+Renderer::Buffer<Point2D> Renderer::mTreeNodeBuffer;
+Renderer::Buffer<Point2D> Renderer::mPathBuffer;
+GLuint Renderer::vao = -1;
 
 bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int height)
 {
@@ -17,14 +23,14 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
     mWidth = width;
     mHeight = height;
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_MULTISAMPLE);
     glutInitWindowSize(mWidth,mHeight);
     glutInitContextVersion(4,3);
     glutInitContextProfile(GLUT_CORE_PROFILE);
     glutCreateWindow("GraphViz");
 
-
-
+    glewExperimental = GL_TRUE;
+    //init glew
     if(glewInit())
     {
         std::cerr << "Unable to initialize GLEW ... exiting" << std::endl;
@@ -47,11 +53,27 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
 
 bool Renderer::initBuffers()
 {
-    //TODO: init spline and tree buffer,
+ /*
+    glGenVertexArrays(1,&vao);
 
-    //Create VAO
-    //Bind VAO
+   glBindVertexArray(vao);
 
+
+    glGenBuffers(1,&mTreeNodeBuffer.id);
+    glBindBuffer(GL_ARRAY_BUFFER,mTreeNodeBuffer.id);
+    glBufferData(GL_ARRAY_BUFFER,mTreeNodeBuffer.data.size() * sizeof(Point2D),NULL,GL_STATIC_DRAW);
+
+
+    glVertexAttribPointer(0,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          0,
+                          0);
+    glBindBuffer(GL_ARRAY_BUFFER,0);
+    glEnableVertexAttribArray(0);
+
+    */
     return true;
 }
 
@@ -115,8 +137,19 @@ bool Renderer::initProgram()
 
 bool Renderer::parseData(Compound *c)
 {
-	//TODO: parse Tree points
-	//TODO: parse Lines
+    TreeNode* t = c->get_node(c->get_root_id());
+    //calculate radial positions for treenodes
+    setRadialPosition(c,t,0.0f,360.0f,1);
+
+
+    //write pathes to buffer, first Point2D determines length of Path, e.g.(Point2D(3,3) next three entries are one path
+    std::vector<NodeId> leaves = c->get_leaf_ids();
+    for(unsigned int i = 0;i <leaves.size();++i)
+    {
+        //find connection and shortest path, push back into pathBuffer
+
+    }
+ //   glBufferSubData(GL_ARRAY_BUFFER,0,mTreeNodeBuffer.data.size()* sizeof(Point2D),mTreeNodeBuffer.data.data());
     return true;
 }
 
@@ -142,6 +175,10 @@ void Renderer::display()
 	//clear buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+  //  glBindVertexArray(vao);
+
+   // glDrawArrays(GL_LINES,0,GLsizei(mTreeNodeBuffer.data.size()/2));
 	//display rendered image
     glutSwapBuffers();
 	//time measurement
@@ -261,4 +298,64 @@ void Renderer::printShaderInfoLog(GLuint shader)
     glGetShaderInfoLog(shader, infologLength, &charsWritten, infoLog);
     printf("%s\n",infoLog);
     free(infoLog);
+}
+
+void Renderer::setRadialPosition(Compound* c,TreeNode* t, float angleMin, float angleMax, float radius)
+{
+
+    //TODO: decide wether to use bisector or tangent as limits
+
+    //check if root
+    std::cout << "Node:" << t->get_id().to_string() << std::endl;
+    if(t->get_level() == 0)
+    {
+        //set root to center
+        t->set_position(Point2D(0.0f,0.0f));
+        std::cout << "Position: ["<<t->get_position().x <<"|"<<t->get_position().y << "]"<< std::endl;
+
+    }
+    else
+    {
+
+        //calculate position from angles
+        float angle = (angleMin+angleMax)/2;
+        angle *= PI/180;
+        float x = radius*(sin(angle));
+        float y = radius*(cos(angle));
+        t->set_position(Point2D(x,y));
+        std::cout << "Position: ["<<t->get_position().x <<"|"<<t->get_position().y << "]" << std::endl;
+        fillBuffer(c->get_node(t->get_parent_id()),t);
+    }
+    float tempMax = 0.0f;
+    //iterate over each child
+    for(unsigned int i = 0;i < t->get_child_ids().size();++i)
+    {
+        //calc angleMin/Max
+        if(i == 0)
+        {
+            TreeNode* child = c->get_node(t->get_child_ids().at(i));
+            float tempMin = angleMin;
+            tempMax = tempMin + (angleMax-angleMin) * (child->get_num_children()+1)/t->get_num_children();
+
+            setRadialPosition(c,child,tempMin,tempMax,radius*child->get_level());
+        }
+        else
+        {
+            TreeNode* child = c->get_node(t->get_child_ids().at(i));
+            float tempMin = tempMax;
+            tempMax = tempMin + (angleMax-angleMin) * (child->get_num_children()+1)/t->get_num_children();
+            setRadialPosition(c,child,tempMin,tempMax,radius*child->get_level());
+        }
+    }
+}
+
+void Renderer::fillBuffer(TreeNode *parent, TreeNode *node)
+{
+    if(parent != NULL)
+    mTreeConnectionBuffer.data.push_back(parent->get_position());
+    if(node != NULL)
+    {
+        mTreeConnectionBuffer.data.push_back(node->get_position());
+        mTreeNodeBuffer.data.push_back(node->get_position());
+    }
 }

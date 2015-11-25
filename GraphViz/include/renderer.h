@@ -24,7 +24,9 @@ private:
     template<typename T>
     struct Buffer
     {
-        int id;
+        Buffer<T>() : id(-1)
+        {}
+        GLuint id;
         std::vector<T> data;
     };
 
@@ -48,10 +50,13 @@ private:
     static MOUSESTATE mState;
 
 	//Buffer for visualising tree itself
-    static Buffer<float> mTreeNodeBuffer;
+    static Buffer<Point2D>  mTreeConnectionBuffer;  //display connections between nodes
+    static Buffer<Point2D>  mTreeNodeBuffer;        //display nodes
 
 	//Buffer for visualising pathes
-    static Buffer<float> mPathBuffer;
+    static Buffer<Point2D> mPathBuffer;             //display
+
+    static GLuint vao;
 
 //functions
 public:
@@ -66,7 +71,7 @@ public:
     static bool     initProgram();
 
 	//parse Tree into Buffer
-    static bool     parseData(Compound *c);
+    static bool     parseData(Compound* c);
 
 	//run Window
     static void     run();
@@ -86,6 +91,16 @@ private:
 
 	//print Compile Info(Shader)
     static void printShaderInfoLog(GLuint shader);
+
+    static void setRadialPosition(Compound *c, TreeNode* t, float angleMin, float angleMax, float radius);
+
+
+    static void fillBuffer(TreeNode* parent, TreeNode* nodem);
+    static void renderTree();
+    static void renderSplines();
+    static void createSplines();
+
+
 
 };
 
