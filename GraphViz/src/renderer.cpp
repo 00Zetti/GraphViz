@@ -359,3 +359,26 @@ void Renderer::fillBuffer(TreeNode *parent, TreeNode *node)
         mTreeNodeBuffer.data.push_back(node->get_position());
     }
 }
+
+//controlPoints: points of control polygon
+//steps : steps of t
+std::vector<Point2D> Renderer::createSplines(const std::vector<Point2D> &controlPoints,float steps)
+{
+    std::vector<Point2D> result;
+    //TODO: create cubic B-Spline with uniform parameterization
+    //for uniform parameterization, first control points interpolates t0 up to t3 with 0,
+    //each t for each Point is the number of the point
+    //e.g. t4 for controlPoint.at(1) is 1, t5 for controlPoint.at(2) is 2
+    //steps determines the number of returning spline points, e.g. steps = 50, return 50 interpolated points on the spline
+    //Have fun
+
+    for(unsigned int i = 0;i < steps;++i)
+    {
+        //parameter to determine point on curve
+        float t = i * (controlPoints.size()-1)/(steps-1);
+
+
+    }
+
+    return result;
+}

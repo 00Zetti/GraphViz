@@ -98,9 +98,7 @@ private:
     static void fillBuffer(TreeNode* parent, TreeNode* nodem);
     static void renderTree();
     static void renderSplines();
-    static void createSplines();
-
-
+    static std::vector<Point2D> createSplines(const std::vector<Point2D> &controlPoints,float stepsize);
 
 };
 
