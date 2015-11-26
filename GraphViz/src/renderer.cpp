@@ -17,7 +17,7 @@ Renderer::Buffer<Point2D> Renderer::mTreeNodeBuffer;
 Renderer::Buffer<Point2D> Renderer::mPathBuffer;
 GLuint Renderer::vao = -1;
 
-GLuint Renderer::prog = 0;
+GLuint Renderer::progTree = 0;
 bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int height)
 {
     //init glut, context, version
@@ -55,17 +55,17 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
 
 bool Renderer::initBuffers()
 {
-
+    //generate and bind VertexArrayObject
     glGenVertexArrays(1,&vao);
     glBindVertexArray(vao);
 
-   glGenBuffers(1,&mTreeNodeBuffer.id);
+    //generate and initialize buffer for treenodes
+    glGenBuffers(1,&mTreeNodeBuffer.id);
     glBindBuffer(GL_ARRAY_BUFFER,mTreeNodeBuffer.id);
     glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER,0);
 
-
-
-
+    //generate and initialize buffer for connections
     glGenBuffers(1,&mTreeConnectionBuffer.id);
     glBindBuffer(GL_ARRAY_BUFFER,mTreeConnectionBuffer.id);
     glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
@@ -87,10 +87,9 @@ bool Renderer::initBuffers()
 
 bool Renderer::initProgram()
 {
-    //Create Shaders
+
     GLint success = 0;
-
-
+    //Create Shaders
     //vertex shader
 
 	//create
@@ -149,52 +148,68 @@ bool Renderer::initProgram()
     }
 
 	//define and create program
-    prog = glCreateProgram();
+    progTree = glCreateProgram();
 
 	//attach shader to program
-    glAttachShader(prog,vertexShader);
-    glAttachShader(prog,fragmentShader);
+    glAttachShader(progTree,vertexShader);
+    glAttachShader(progTree,fragmentShader);
 
 	//link shader together
-    glLinkProgram(prog);
+    glLinkProgram(progTree);
 
-    glDetachShader(prog,vertexShader);
-    glDetachShader(prog,fragmentShader);
+    glDetachShader(progTree,vertexShader);
+    glDetachShader(progTree,fragmentShader);
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
 	//use this program
-    glUseProgram(prog);
+    glUseProgram(progTree);
 
     return true;
 }
 
 bool Renderer::parseData(Compound *c)
 {
+    //get root
     TreeNode* t = c->get_node(c->get_root_id());
+
+
     //calculate radial positions for treenodes
     setRadialPosition(c,t,0.0f,360.0f,0.1f);
 
-
     //write pathes to buffer, first Point2D determines length of Path, e.g.(Point2D(3,3) next three entries are one path
-    std::vector<NodeId> leaves = c->get_leaf_ids();
-    for(unsigned int i = 0;i <leaves.size();++i)
+    const std::vector<std::pair<NodeId,NodeId>>* leaves = c->get_connections();
+    for(unsigned int i = 0;i <leaves->size();++i)
     {
         //find connection and shortest path, push back into pathBuffer
 
+        //ugly workaround
+        std::pair<NodeId,NodeId> con = leaves->at(i);
+        Path p = c->get_shortest_path(con.first,con.second);
+        std::vector<Point2D> controlpoints;
+        for(unsigned int j = 0;j < p.nodes.size();++j)
+        {
+            controlpoints.push_back(c->get_node(p.nodes.at(j))->get_position());
+        }
+
+        std::vector<Point2D> spline = createSplines(controlpoints,50);
+
     }
+
+
+   //send node positions to opengl
    glBindBuffer(GL_ARRAY_BUFFER,mTreeNodeBuffer.id);
    glBufferData(GL_ARRAY_BUFFER,mTreeNodeBuffer.data.size() * sizeof(Point2D),mTreeNodeBuffer.data.data(),GL_STATIC_DRAW);
    glBufferSubData(GL_ARRAY_BUFFER,0,mTreeNodeBuffer.data.size()* sizeof(Point2D),mTreeNodeBuffer.data.data());
    glBindBuffer(GL_ARRAY_BUFFER,0);
 
+   //send nodeConnections to opengl
    glBindBuffer(GL_ARRAY_BUFFER,mTreeConnectionBuffer.id);
    glBufferData(GL_ARRAY_BUFFER,mTreeConnectionBuffer.data.size() * sizeof(Point2D),mTreeConnectionBuffer.data.data(),GL_STATIC_DRAW);
    glBufferSubData(GL_ARRAY_BUFFER,0,mTreeConnectionBuffer.data.size() * sizeof(Point2D),mTreeConnectionBuffer.data.data());
    glBindBuffer(GL_ARRAY_BUFFER,0);
 
-   std::cout << "line 160" << std::endl;
     return true;
 }
 
@@ -221,14 +236,7 @@ void Renderer::display()
 	//clear buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-    glBindVertexArray(vao);
-
-    //glBindBuffer(GL_ARRAY_BUFFER,mTreeNodeBuffer.id);
-
-
-    glDrawArrays(GL_LINES,0,mTreeConnectionBuffer.data.size());
-    glDrawArrays(GL_POINTS,0,mTreeConnectionBuffer.data.size());
+    renderTree();
     //display rendered image
     glutSwapBuffers();
 
@@ -236,6 +244,21 @@ void Renderer::display()
 	//time measurement
     int end = glutGet(GLUT_ELAPSED_TIME);
     mDeltaTime = float(end-start)/1000.0f;
+}
+
+void Renderer::renderTree()
+{
+    glUseProgram(progTree);
+    glDrawArrays(GL_LINES,0,mTreeConnectionBuffer.data.size());
+    glDrawArrays(GL_POINTS,0,mTreeConnectionBuffer.data.size());
+    //ugly fix for blue center
+    glDrawArrays(GL_POINTS,0,1);
+    glUseProgram(0);
+}
+
+void Renderer::renderSplines()
+{
+    //glUseProgram(progSplines);
 }
 
 void Renderer::keyboard(unsigned char key, int x, int y)
@@ -334,22 +357,6 @@ std::string Renderer::readFile(const std::string &source)
    }
    
    return content;
-}
-
-void Renderer::printShaderInfoLog(GLuint shader)
-{
-	//shader == -1 , no Shader attached
-    if (shader == -1)
-        return;
-    GLint infologLength = 0;
-    GLsizei charsWritten  = 0;
-    char *infoLog;
-
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH,&infologLength);
-    infoLog = (char *)malloc(infologLength);
-    glGetShaderInfoLog(shader, infologLength, &charsWritten, infoLog);
-    printf("%s\n",infoLog);
-    free(infoLog);
 }
 
 void Renderer::setRadialPosition(Compound* c,TreeNode* t, float angleMin, float angleMax, float radius)

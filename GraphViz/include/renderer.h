@@ -1,7 +1,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "../include/compound.h"
+#include "compound.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -54,10 +54,11 @@ private:
     static Buffer<Point2D>  mTreeNodeBuffer;        //display nodes
 
 	//Buffer for visualising pathes
-    static Buffer<Point2D> mPathBuffer;             //display
+    static Buffer<Point2D> mPathBuffer;             //display pathes between nodes
 
     static GLuint vao;
-    static GLuint prog;
+    static GLuint progTree;                         //display Tree
+    static GLuint progSplines;                      //display Splines
 
 //functions
 public:
@@ -90,13 +91,10 @@ private:
 	//read Shader into String
     static std::string readFile(const std::string &source);
 
-	//print Compile Info(Shader)
-    static void printShaderInfoLog(GLuint shader);
-
     static void setRadialPosition(Compound *c, TreeNode* t, float angleMin, float angleMax, float radius);
 
 
-    static void fillBuffer(TreeNode* parent, TreeNode* nodem);
+    static void fillBuffer(TreeNode* parent, TreeNode* node);
     static void renderTree();
     static void renderSplines();
     static std::vector<Point2D> createSplines(const std::vector<Point2D> &controlPoints,float stepsize);

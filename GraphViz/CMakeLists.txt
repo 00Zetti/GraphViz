@@ -61,6 +61,8 @@ add_executable(${PROJECT_NAME} ${SRC_LIST}
         #SHADER
         shader/vertexShader.vert
         shader/fragmentShader.frag
+	shader/splineVertexShader.vert
+	shader/splineFragmentShader.frag
 )
 
 target_link_libraries(GraphViz ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARIES})

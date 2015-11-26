@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     // create random compound graph
-    Compound com = Compound::create_random(7, 80, 3, 10);
+    Compound com = Compound::create_random(7, 160, 2, 10);
 
     // mutate root node
     NodeId root = com.get_root_id();
@@ -26,13 +26,13 @@ int main(int argc, char *argv[])
 
     //create, link shaders
     Renderer::initProgram();
-    std::cout << "graphviz line 29" << std::endl;
+
     //create buffers
     Renderer::initBuffers();
-    std::cout << "graphviz line 32" << std::endl;
+
     //calculate node positions, pass pathes to buffers
     Renderer::parseData(&com);
-    std::cout << "graphviz line 35" << std::endl;
+
     Renderer::run();
     return 0;
 }
