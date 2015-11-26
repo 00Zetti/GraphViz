@@ -142,6 +142,9 @@ class Compound {
         // add a connection between the nodes a and b
         void add_connection(NodeId a, NodeId b);
 
+        // get all non hierarchical connections
+        vector<pair<NodeId, NodeId> > get_connections();
+
         pair<NodeId, NodeId> get_connection(ConnId id) const;
 
         // return the shortest path between the nodes a and b
