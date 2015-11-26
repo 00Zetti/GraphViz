@@ -143,7 +143,7 @@ class Compound {
         void add_connection(NodeId a, NodeId b);
 
         // get all non hierarchical connections
-        vector<pair<NodeId, NodeId> > get_connections();
+        const vector<pair<NodeId, NodeId> >* get_connections();
 
         pair<NodeId, NodeId> get_connection(ConnId id) const;
 

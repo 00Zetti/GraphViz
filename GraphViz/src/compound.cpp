@@ -284,8 +284,8 @@ void Compound::add_connection(NodeId a, NodeId b) {
     get_node(b)->connections.push_back(id);
 }
 
-vector<pair<NodeId, NodeId> > Compound::get_connections() {
-    return connections;
+const vector<pair<NodeId, NodeId> >* Compound::get_connections() {
+    return &connections;
 }
 
 pair<NodeId, NodeId> Compound::get_connection(ConnId id) const {
