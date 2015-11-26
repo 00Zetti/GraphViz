@@ -26,7 +26,7 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_MULTISAMPLE);
     glutInitWindowSize(mWidth,mHeight);
-    glutInitContextVersion(4,3);
+    glutInitContextVersion(4,0);
     glutInitContextProfile(GLUT_CORE_PROFILE);
     glutCreateWindow("GraphViz");
 
