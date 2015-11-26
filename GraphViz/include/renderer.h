@@ -57,6 +57,7 @@ private:
     static Buffer<Point2D> mPathBuffer;             //display
 
     static GLuint vao;
+    static GLuint prog;
 
 //functions
 public:

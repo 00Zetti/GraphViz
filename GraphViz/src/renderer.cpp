@@ -17,6 +17,7 @@ Renderer::Buffer<Point2D> Renderer::mTreeNodeBuffer;
 Renderer::Buffer<Point2D> Renderer::mPathBuffer;
 GLuint Renderer::vao = -1;
 
+GLuint Renderer::prog = 0;
 bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int height)
 {
     //init glut, context, version
@@ -48,21 +49,26 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
     //white as clear color
     glClearColor(1.0f,1.0f,1.0f,1.0f);
 
+    glPointSize(5.0f);
     return true;
 }
 
 bool Renderer::initBuffers()
 {
- /*
+
     glGenVertexArrays(1,&vao);
+    glBindVertexArray(vao);
 
-   glBindVertexArray(vao);
-
-
-    glGenBuffers(1,&mTreeNodeBuffer.id);
+   glGenBuffers(1,&mTreeNodeBuffer.id);
     glBindBuffer(GL_ARRAY_BUFFER,mTreeNodeBuffer.id);
-    glBufferData(GL_ARRAY_BUFFER,mTreeNodeBuffer.data.size() * sizeof(Point2D),NULL,GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
 
+
+
+
+    glGenBuffers(1,&mTreeConnectionBuffer.id);
+    glBindBuffer(GL_ARRAY_BUFFER,mTreeConnectionBuffer.id);
+    glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
 
     glVertexAttribPointer(0,
                           2,
@@ -71,15 +77,19 @@ bool Renderer::initBuffers()
                           0,
                           0);
     glBindBuffer(GL_ARRAY_BUFFER,0);
+
     glEnableVertexAttribArray(0);
 
-    */
+
+    glBindBuffer(GL_ARRAY_BUFFER,0);
     return true;
 }
 
 bool Renderer::initProgram()
 {
     //Create Shaders
+    GLint success = 0;
+
 
     //vertex shader
 
@@ -99,8 +109,17 @@ bool Renderer::initProgram()
     glCompileShader(vertexShader);
 
 	//print compile progression
-    printShaderInfoLog(vertexShader);
+    glGetShaderiv(vertexShader,GL_COMPILE_STATUS,&success);
 
+    if(success == GL_FALSE)
+    {
+        std::cout << "compilation of vertex shader failed." << std::endl;
+        return false;
+    }
+    else
+    {
+        std::cout << "successfully compiled vertex shader." << std::endl;
+    }
     //fragmentShader
 
 	//create
@@ -117,10 +136,20 @@ bool Renderer::initProgram()
     glCompileShader(fragmentShader);
 
 	//print compile progression
-    printShaderInfoLog(fragmentShader);
+    glGetShaderiv(fragmentShader,GL_COMPILE_STATUS,&success);
+
+    if(success == GL_FALSE)
+    {
+        std::cout << "compilation of vertex shader failed." << std::endl;
+        return false;
+    }
+    else
+    {
+        std::cout << "successfully compiled fragment shader." << std::endl;
+    }
 
 	//define and create program
-    GLuint prog = glCreateProgram();
+    prog = glCreateProgram();
 
 	//attach shader to program
     glAttachShader(prog,vertexShader);
@@ -128,6 +157,12 @@ bool Renderer::initProgram()
 
 	//link shader together
     glLinkProgram(prog);
+
+    glDetachShader(prog,vertexShader);
+    glDetachShader(prog,fragmentShader);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
 	//use this program
     glUseProgram(prog);
@@ -139,7 +174,7 @@ bool Renderer::parseData(Compound *c)
 {
     TreeNode* t = c->get_node(c->get_root_id());
     //calculate radial positions for treenodes
-    setRadialPosition(c,t,0.0f,360.0f,1);
+    setRadialPosition(c,t,0.0f,360.0f,0.1f);
 
 
     //write pathes to buffer, first Point2D determines length of Path, e.g.(Point2D(3,3) next three entries are one path
@@ -149,20 +184,31 @@ bool Renderer::parseData(Compound *c)
         //find connection and shortest path, push back into pathBuffer
 
     }
- //   glBufferSubData(GL_ARRAY_BUFFER,0,mTreeNodeBuffer.data.size()* sizeof(Point2D),mTreeNodeBuffer.data.data());
+   glBindBuffer(GL_ARRAY_BUFFER,mTreeNodeBuffer.id);
+   glBufferData(GL_ARRAY_BUFFER,mTreeNodeBuffer.data.size() * sizeof(Point2D),mTreeNodeBuffer.data.data(),GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER,0,mTreeNodeBuffer.data.size()* sizeof(Point2D),mTreeNodeBuffer.data.data());
+   glBindBuffer(GL_ARRAY_BUFFER,0);
+
+   glBindBuffer(GL_ARRAY_BUFFER,mTreeConnectionBuffer.id);
+   glBufferData(GL_ARRAY_BUFFER,mTreeConnectionBuffer.data.size() * sizeof(Point2D),mTreeConnectionBuffer.data.data(),GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER,0,mTreeConnectionBuffer.data.size() * sizeof(Point2D),mTreeConnectionBuffer.data.data());
+   glBindBuffer(GL_ARRAY_BUFFER,0);
+
+   std::cout << "line 160" << std::endl;
     return true;
 }
 
 void Renderer::run()
 {
 	//dummy MVP
-	glMatrixMode(GL_PROJECTION);
+    glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0,1,0,1,-1,1);
+    gluPerspective(45.0,1,0.1,100);
     glMatrixMode(GL_MODELVIEW);
     glViewport(0,0,mWidth,mHeight);
 
 	//run Main Loop
+
     glutMainLoop();
 }
 
@@ -176,11 +222,17 @@ void Renderer::display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-  //  glBindVertexArray(vao);
+    glBindVertexArray(vao);
 
-   // glDrawArrays(GL_LINES,0,GLsizei(mTreeNodeBuffer.data.size()/2));
-	//display rendered image
+    //glBindBuffer(GL_ARRAY_BUFFER,mTreeNodeBuffer.id);
+
+
+    glDrawArrays(GL_LINES,0,mTreeConnectionBuffer.data.size());
+    glDrawArrays(GL_POINTS,0,mTreeConnectionBuffer.data.size());
+    //display rendered image
     glutSwapBuffers();
+
+
 	//time measurement
     int end = glutGet(GLUT_ELAPSED_TIME);
     mDeltaTime = float(end-start)/1000.0f;
@@ -313,6 +365,7 @@ void Renderer::setRadialPosition(Compound* c,TreeNode* t, float angleMin, float 
         t->set_position(Point2D(0.0f,0.0f));
         std::cout << "Position: ["<<t->get_position().x <<"|"<<t->get_position().y << "]"<< std::endl;
 
+        mTreeNodeBuffer.data.push_back(t->get_position());
     }
     else
     {
@@ -320,8 +373,8 @@ void Renderer::setRadialPosition(Compound* c,TreeNode* t, float angleMin, float 
         //calculate position from angles
         float angle = (angleMin+angleMax)/2;
         angle *= PI/180;
-        float x = radius*(sin(angle));
-        float y = radius*(cos(angle));
+        float x = radius*(sin(angle)) * t->get_level();
+        float y = radius*(cos(angle)) * t->get_level();
         t->set_position(Point2D(x,y));
         std::cout << "Position: ["<<t->get_position().x <<"|"<<t->get_position().y << "]" << std::endl;
         fillBuffer(c->get_node(t->get_parent_id()),t);
@@ -337,14 +390,14 @@ void Renderer::setRadialPosition(Compound* c,TreeNode* t, float angleMin, float 
             float tempMin = angleMin;
             tempMax = tempMin + (angleMax-angleMin) * (child->get_num_children()+1)/t->get_num_children();
 
-            setRadialPosition(c,child,tempMin,tempMax,radius*child->get_level());
+            setRadialPosition(c,child,tempMin,tempMax,radius);
         }
         else
         {
             TreeNode* child = c->get_node(t->get_child_ids().at(i));
             float tempMin = tempMax;
             tempMax = tempMin + (angleMax-angleMin) * (child->get_num_children()+1)/t->get_num_children();
-            setRadialPosition(c,child,tempMin,tempMax,radius*child->get_level());
+            setRadialPosition(c,child,tempMin,tempMax,radius);
         }
     }
 }
@@ -377,8 +430,8 @@ std::vector<Point2D> Renderer::createSplines(const std::vector<Point2D> &control
         //parameter to determine point on curve
         float t = i * (controlPoints.size()-1)/(steps-1);
 
-
     }
 
     return result;
 }
+
