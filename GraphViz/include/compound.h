@@ -60,6 +60,12 @@ class Point2D {
             Point2D result(this->x + lhs.x, this->y + lhs.y);
             return result;
         }
+
+        Point2D operator-(const Point2D &lhs)
+        {
+            Point2D result(this->x - lhs.x, this->y - lhs.y);
+            return result;
+        }
 };
 
 // an Element of a Tree

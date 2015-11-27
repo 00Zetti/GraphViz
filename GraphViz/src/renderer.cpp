@@ -15,6 +15,8 @@ Renderer::MOUSESTATE Renderer::mState = IDLE;
 Renderer::Buffer<Point2D> Renderer::mTreeConnectionBuffer;
 Renderer::Buffer<Point2D> Renderer::mTreeNodeBuffer;
 Renderer::Buffer<Point2D> Renderer::mSplineBuffer;
+Renderer::Buffer<Point2D> Renderer::mSplineControlBuffer;
+Renderer::Buffer<float>   Renderer::mSplineTBuffer;
 GLuint Renderer::vaoTreeConn = -1;
 GLuint Renderer::vaoSpline = -1;
 GLuint Renderer::vaoTreeNode = -1;
@@ -23,6 +25,7 @@ GLuint Renderer::progSpline = 0;
 GLuint Renderer::progTreeNode = 0;
 
 int Renderer::stepsize = 50;
+float Renderer::beta = 0.5f;
 
 bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int height)
 {
@@ -57,6 +60,8 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
 
     glEnable(GL_MULTISAMPLE);
     glPointSize(5.0f);
+    glLineWidth(2.0f);
+
     return true;
 }
 
@@ -108,6 +113,30 @@ bool Renderer::initBuffers()
 
     glVertexAttribPointer(0,
                           2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          0,
+                          0);
+    glBindBuffer(GL_ARRAY_BUFFER,0);
+
+    glGenBuffers(1,&mSplineControlBuffer.id);
+    glBindBuffer(GL_ARRAY_BUFFER,mSplineControlBuffer.id);
+    glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
+
+    glVertexAttribPointer(1,
+                          4,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          0,
+                          0);
+    glBindBuffer(GL_ARRAY_BUFFER,0);
+
+    glGenBuffers(1,&mSplineTBuffer.id);
+    glBindBuffer(GL_ARRAY_BUFFER,mSplineTBuffer.id);
+    glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
+
+    glVertexAttribPointer(2,
+                          1,
                           GL_FLOAT,
                           GL_FALSE,
                           0,
@@ -329,7 +358,7 @@ bool Renderer::parseData(Compound *c)
         }
 
 
-        createSplines(mSplineBuffer.data,controlpoints,stepsize);
+        createSplines(mSplineBuffer.data,controlpoints);
     }
     std::cout << "created Splines" << std::endl;
 
@@ -350,6 +379,16 @@ bool Renderer::parseData(Compound *c)
    glBindBuffer(GL_ARRAY_BUFFER,mTreeConnectionBuffer.id);
    glBufferData(GL_ARRAY_BUFFER,mTreeConnectionBuffer.data.size() * sizeof(Point2D),NULL,GL_STATIC_DRAW);
    glBufferSubData(GL_ARRAY_BUFFER,0,mTreeConnectionBuffer.data.size() * sizeof(Point2D),mTreeConnectionBuffer.data.data());
+   glBindBuffer(GL_ARRAY_BUFFER,0);
+
+   glBindBuffer(GL_ARRAY_BUFFER,mSplineControlBuffer.id);
+   glBufferData(GL_ARRAY_BUFFER,mSplineControlBuffer.data.size() * sizeof(Point2D),NULL,GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER,0,mSplineControlBuffer.data.size()* sizeof(Point2D),mSplineControlBuffer.data.data());
+   glBindBuffer(GL_ARRAY_BUFFER,0);
+
+   glBindBuffer(GL_ARRAY_BUFFER,mSplineTBuffer.id);
+   glBufferData(GL_ARRAY_BUFFER,mSplineTBuffer.data.size() * sizeof(Point2D),NULL,GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER,0,mSplineTBuffer.data.size() * sizeof(Point2D), mSplineTBuffer.data.data());
    glBindBuffer(GL_ARRAY_BUFFER,0);
 
     return true;
@@ -375,8 +414,12 @@ void Renderer::display()
 	//time measurement
     int start = glutGet(GLUT_ELAPSED_TIME);
 
+
+
 	//clear buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
 
     renderTree();
     renderSplines();
@@ -405,12 +448,20 @@ void Renderer::renderSplines()
 {
     glUseProgram(progSpline);
     glBindVertexArray(vaoSpline);
+
+    GLint betaID = glGetUniformLocation(progSpline,"beta");
+
+    glUniform1f(betaID,beta);
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
     for(unsigned int i = 0;i < mSplineBuffer.data.size();i+=stepsize)
     {
         glDrawArrays(GL_LINE_STRIP,i,stepsize);
     }
     glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
     glBindVertexArray(0);
     glUseProgram(0);
 }
@@ -434,6 +485,14 @@ void Renderer::keyboard(unsigned char key, int x, int y)
 {
 
     //last to call
+    switch(key)
+    {
+    case 'm' : beta+= 0.01f;break;
+    case 'n' : beta-= 0.01f;break;
+       default: break;
+    }
+    beta = beta < 0.0f ? 0.0f : beta;
+    beta = beta > 1.0f ? 1.0f : beta;
     glutPostRedisplay();
 }
 
@@ -591,48 +650,50 @@ void Renderer::fillBuffer(TreeNode *parent, TreeNode *node)
 
 //controlPoints: points of control polygon
 //steps : steps of t
-void Renderer::createSplines(std::vector<Point2D> &spline,const std::vector<Point2D> &controlPoints,float steps)
+void Renderer::createSplines(std::vector<Point2D> &spline,const std::vector<Point2D> &controlPoints)
 {
-    //TODO: create cubic B-Spline with uniform parameterization
-    //for uniform parameterization, first control points interpolates t0 up to t3 with 0,
-    //each t for each Point is the number of the point
-    //e.g. t4 for controlPoint.at(1) is 1, t5 for controlPoint.at(2) is 2
-    //steps determines the number of returning spline points, e.g. steps = 50, return 50 interpolated points on the spline
-    //Have fun
 
     std::vector<float> knotsequence;
 
-    //degree
-    int degree = 3;
+    //degree, cubic because of paper
+    //if the control polygon only consists of 3 points, use quadratic b spline
+    int degree = controlPoints.size() > 3 ? 3 : 2;
     int order = degree+1;
+
+    //create knot sequence
     //interpolate first point
-    knotsequence.push_back(0);
-    knotsequence.push_back(0);
-    knotsequence.push_back(0);
-    knotsequence.push_back(0);
-    int knotindex = 1;
+    for(unsigned int i = 0;i < order;++i)
+    {
+        knotsequence.push_back(0);
+    }
+    float knotindex = 1.0f;
     for(unsigned int i = order;i < (controlPoints.size());++i)
     {
         knotsequence.push_back(knotindex);
         knotindex++;
     }
-
-
     //interpolate last point
-    knotsequence.push_back(controlPoints.size()-degree);
-    knotsequence.push_back(controlPoints.size()-degree);
-    knotsequence.push_back(controlPoints.size()-degree);
-    knotsequence.push_back(controlPoints.size()-degree);
-
-    for(unsigned int l = 0;l < steps;++l)
+    for(unsigned int i = 0;i < order;++i)
     {
+        knotsequence.push_back(controlPoints.size()-degree);
+    }
 
+
+    //loop over every step, create steps many points on spline
+    for(unsigned int l = 0;l < stepsize;++l)
+    {
+        //for bundling, first and last point of polygon needed
+        Point2D first = controlPoints.at(0);
+        Point2D last = controlPoints.at(controlPoints.size()-1);
         //parameter to determine point on curve
-        float t = l * knotsequence.at(knotsequence.size()-1)/(steps-1);
+        float t = (l * knotsequence.at(knotsequence.size()-1)/(stepsize-1));
         //find startIndex
         int r = degree + floor(t);
         if(t == knotsequence.at(knotsequence.size()-1))
         {
+            mSplineControlBuffer.data.push_back(first);
+            mSplineControlBuffer.data.push_back(last);
+            mSplineTBuffer.data.push_back(float(l)/float(stepsize));
             spline.push_back(controlPoints.at(controlPoints.size()-1));
             continue;
         }
@@ -655,7 +716,17 @@ void Renderer::createSplines(std::vector<Point2D> &spline,const std::vector<Poin
             }
         }
 
-        spline.push_back(iterationPoints.at(iterationPoints.size()-1));
+
+        //TODO beta parameter
+
+        Point2D old = iterationPoints.at(iterationPoints.size()-1);
+        mSplineControlBuffer.data.push_back(first);
+        mSplineControlBuffer.data.push_back(last);
+        std::cout << "L:" << l << " stepsize" << stepsize << "STEPSIZE" << float(l)/float(stepsize) << std::endl;
+        mSplineTBuffer.data.push_back(float(l)/float(stepsize));
+        //old = old * beta + (first + (last -first) * (t/(controlPoints.size()-degree))) * (1.0f-beta);
+
+        spline.push_back(old);
 
     }
 

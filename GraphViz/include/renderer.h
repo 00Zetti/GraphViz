@@ -52,7 +52,8 @@ private:
 	//Buffer for visualising tree itself
     static Buffer<Point2D>  mTreeConnectionBuffer;  //display connections between nodes
     static Buffer<Point2D>  mTreeNodeBuffer;        //display nodes
-
+    static Buffer<Point2D>  mSplineControlBuffer;
+    static Buffer<float>    mSplineTBuffer;
 	//Buffer for visualising pathes
     static Buffer<Point2D> mSplineBuffer;             //display pathes between nodes
 
@@ -63,6 +64,7 @@ private:
     static GLuint progSpline;                      //display Splines
     static GLuint progTreeNode;
     static int    stepsize;
+    static float beta;
 
 //functions
 public:
@@ -102,7 +104,7 @@ private:
     static void renderTree();
     static void renderSplines();
     static void renderNodes();
-    static void createSplines(std::vector<Point2D> &spline,const std::vector<Point2D> &controlPoints,float stepsize);
+    static void createSplines(std::vector<Point2D> &spline,const std::vector<Point2D> &controlPoints);
     static float alpha(float t, float ti, float tikj);
 
 };

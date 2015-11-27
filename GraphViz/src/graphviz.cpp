@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     // create random compound graph
-    Compound com = Compound::create_random(5, 120, 2, 200);
+    Compound com = Compound::create_random(5, 100, 2, 400);
 
     // mutate root node
     NodeId root = com.get_root_id();
