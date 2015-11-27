@@ -84,6 +84,10 @@ vector<NodeId> TreeNode::get_child_ids() const {
     return children;
 }
 
+const vector<NodeId>* TreeNode::get_const_child_ids() const {
+    return &children;
+}
+
 vector<ConnId> TreeNode::get_connection_ids() const {
     return connections;
 }
@@ -186,15 +190,17 @@ Compound Compound::create_random(unsigned int max_level,
     // This should ideally be done only once at program start.
     srand(time(NULL));
 
+    // add nodes
     NodeId x = com.get_root_id();
-    while (com.nodes.size() < min_num_nodes) {
+    while (com.nodes.size() < min_num_nodes ||
+           com.get_const_node(com.get_root_id())->get_const_child_ids()->size() < 2) {
 
-        // move down
+        // move down to level == max_level
         while (com.get_const_node(x)->level < max_level) {
             x = com.add_node(x);
         }
 
-        // move up
+        // move up, but potentially not all the way
         x = com.get_const_node(x)->parent_id;
         for (int k = 0; k < max_level - 1; k++) {
             if (rand() % avg_num_children != 0) {
@@ -202,8 +208,14 @@ Compound Compound::create_random(unsigned int max_level,
             }
             x = com.get_const_node(x)->parent_id;
         }
+
+        // increase chance of moving up to root node
+        if (rand() % (min_num_nodes / (max_level + 1)) == 0) {
+            x = com.get_root_id();
+        }
     }
 
+    // add connections
     vector<NodeId> leaves = com.get_leaf_ids();
     unsigned int num_leaves = leaves.size();
 
