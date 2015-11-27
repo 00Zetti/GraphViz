@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     // create random compound graph
-    Compound com = Compound::create_random(7, 160, 2, 10);
+    Compound com = Compound::create_random(5, 120, 2, 200);
 
     // mutate root node
     NodeId root = com.get_root_id();
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     // print compound graph
     cout << com.to_string() << endl;
 
-    if(!Renderer::initGLUT(argc,argv,512,512))
+    if(!Renderer::initGLUT(argc,argv,800,800))
     {
         exit(EXIT_FAILURE);
     }

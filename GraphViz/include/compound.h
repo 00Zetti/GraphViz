@@ -48,6 +48,18 @@ class Point2D {
 
         float x;
         float y;
+
+        Point2D operator*(const float &lhs)
+        {
+            Point2D result(this->x * lhs,this->y * lhs);
+            return result;
+        }
+
+        Point2D operator+(const Point2D &lhs)
+        {
+            Point2D result(this->x + lhs.x, this->y + lhs.y);
+            return result;
+        }
 };
 
 // an Element of a Tree

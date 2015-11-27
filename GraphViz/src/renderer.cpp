@@ -14,10 +14,16 @@ Renderer::Camera  Renderer::mCamera;
 Renderer::MOUSESTATE Renderer::mState = IDLE;
 Renderer::Buffer<Point2D> Renderer::mTreeConnectionBuffer;
 Renderer::Buffer<Point2D> Renderer::mTreeNodeBuffer;
-Renderer::Buffer<Point2D> Renderer::mPathBuffer;
-GLuint Renderer::vao = -1;
+Renderer::Buffer<Point2D> Renderer::mSplineBuffer;
+GLuint Renderer::vaoTreeConn = -1;
+GLuint Renderer::vaoSpline = -1;
+GLuint Renderer::vaoTreeNode = -1;
+GLuint Renderer::progTreeConn = 0;
+GLuint Renderer::progSpline = 0;
+GLuint Renderer::progTreeNode = 0;
 
-GLuint Renderer::progTree = 0;
+int Renderer::stepsize = 50;
+
 bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int height)
 {
     //init glut, context, version
@@ -26,7 +32,7 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_MULTISAMPLE);
     glutInitWindowSize(mWidth,mHeight);
-    glutInitContextVersion(4,0);
+    glutInitContextVersion(4,3);
     glutInitContextProfile(GLUT_CORE_PROFILE);
     glutCreateWindow("GraphViz");
 
@@ -49,6 +55,7 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
     //white as clear color
     glClearColor(1.0f,1.0f,1.0f,1.0f);
 
+    glEnable(GL_MULTISAMPLE);
     glPointSize(5.0f);
     return true;
 }
@@ -56,18 +63,30 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
 bool Renderer::initBuffers()
 {
     //generate and bind VertexArrayObject
-    glGenVertexArrays(1,&vao);
-    glBindVertexArray(vao);
+    glGenVertexArrays(1,&vaoTreeConn);
+    glBindVertexArray(vaoTreeConn);
+
+    // generate and initialize buffer for connections
+     glGenBuffers(1,&mTreeConnectionBuffer.id);
+     glBindBuffer(GL_ARRAY_BUFFER,mTreeConnectionBuffer.id);
+     glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
+
+     glVertexAttribPointer(0,
+                           2,
+                           GL_FLOAT,
+                           GL_FALSE,
+                           0,
+                           0);
+     glBindBuffer(GL_ARRAY_BUFFER,0);
+     glBindVertexArray(0);
 
     //generate and initialize buffer for treenodes
+
+     glGenVertexArrays(1,&vaoTreeNode);
+     glBindVertexArray(vaoTreeNode);
+
     glGenBuffers(1,&mTreeNodeBuffer.id);
     glBindBuffer(GL_ARRAY_BUFFER,mTreeNodeBuffer.id);
-    glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER,0);
-
-    //generate and initialize buffer for connections
-    glGenBuffers(1,&mTreeConnectionBuffer.id);
-    glBindBuffer(GL_ARRAY_BUFFER,mTreeConnectionBuffer.id);
     glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
 
     glVertexAttribPointer(0,
@@ -77,11 +96,25 @@ bool Renderer::initBuffers()
                           0,
                           0);
     glBindBuffer(GL_ARRAY_BUFFER,0);
+    glBindVertexArray(0);
 
-    glEnableVertexAttribArray(0);
 
+    glGenVertexArrays(1,&vaoSpline);
+    glBindVertexArray(vaoSpline);
 
+    glGenBuffers(1,&mSplineBuffer.id);
+    glBindBuffer(GL_ARRAY_BUFFER,mSplineBuffer.id);
+    glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          0,
+                          0);
     glBindBuffer(GL_ARRAY_BUFFER,0);
+    glBindVertexArray(0);
+
     return true;
 }
 
@@ -98,7 +131,7 @@ bool Renderer::initProgram()
 	//find source
     std::string shaderDir(VIZ_DIR);
 
-    std::string vertexSource = readFile(shaderDir+"/vertexShader.vert");
+    std::string vertexSource = readFile(shaderDir+"/connVertexShader.vert");
     const char* vertexSourceC = vertexSource.c_str();
 
 	//attach source
@@ -125,7 +158,7 @@ bool Renderer::initProgram()
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
 	//find source
-    std::string fragmentSource = readFile(shaderDir+"/fragmentShader.frag");
+    std::string fragmentSource = readFile(shaderDir+"/connFragmentShader.frag");
     const char* fragmentSourceC = fragmentSource.c_str();
 
 	//attach source
@@ -148,23 +181,125 @@ bool Renderer::initProgram()
     }
 
 	//define and create program
-    progTree = glCreateProgram();
+    progTreeConn = glCreateProgram();
 
 	//attach shader to program
-    glAttachShader(progTree,vertexShader);
-    glAttachShader(progTree,fragmentShader);
+    glAttachShader(progTreeConn,vertexShader);
+    glAttachShader(progTreeConn,fragmentShader);
 
 	//link shader together
-    glLinkProgram(progTree);
+    glLinkProgram(progTreeConn);
 
-    glDetachShader(progTree,vertexShader);
-    glDetachShader(progTree,fragmentShader);
+    glDetachShader(progTreeConn,vertexShader);
+    glDetachShader(progTreeConn,fragmentShader);
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-	//use this program
-    glUseProgram(progTree);
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+    vertexSource = readFile(shaderDir+"/splineVertexShader.vert");
+    vertexSourceC = vertexSource.c_str();
+
+    glShaderSource(vertexShader,1,&vertexSourceC,NULL);
+
+    glCompileShader(vertexShader);
+
+    glGetShaderiv(vertexShader,GL_COMPILE_STATUS,&success);
+
+    if(success == GL_FALSE)
+    {
+        std::cout << "compilation of vertex shader failed." << std::endl;
+        return false;
+    }
+    else
+    {
+        std::cout << "successfully compiled vertex shader." << std::endl;
+    }
+
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    fragmentSource = readFile(shaderDir+"/splineFragmentShader.frag");
+    fragmentSourceC = fragmentSource.c_str();
+
+    glShaderSource(fragmentShader,1,&fragmentSourceC,NULL);
+
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader,GL_COMPILE_STATUS,&success);
+
+    if(success == GL_FALSE)
+    {
+        std::cout << "compilation of vertex shader failed." << std::endl;
+        return false;
+    }
+    else
+    {
+        std::cout << "successfully compiled fragment shader." << std::endl;
+    }
+
+    progSpline = glCreateProgram();
+
+    glAttachShader(progSpline,vertexShader);
+    glAttachShader(progSpline,fragmentShader);
+
+    glLinkProgram(progSpline);
+
+    glDetachShader(progSpline,vertexShader);
+    glDetachShader(progSpline,fragmentShader);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    vertexShader =  glCreateShader(GL_VERTEX_SHADER);
+    vertexSource = readFile(shaderDir+"/nodeVertexShader.vert");
+    vertexSourceC = vertexSource.c_str();
+
+    glShaderSource(vertexShader,1,&vertexSourceC,NULL);
+    glCompileShader(vertexShader);
+
+    glGetShaderiv(vertexShader,GL_COMPILE_STATUS,&success);
+
+    if(success == GL_FALSE)
+    {
+        std::cout << "compilation of vertex shader failed." << std::endl;
+        return false;
+    }
+    else
+    {
+        std::cout << "successfully compiled vertex shader." << std::endl;
+    }
+
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    fragmentSource = readFile(shaderDir+"/nodeFragmentShader.frag");
+    fragmentSourceC = fragmentSource.c_str();
+
+    glShaderSource(fragmentShader,1,&fragmentSourceC,NULL);
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader,GL_COMPILE_STATUS,&success);
+
+    if(success == GL_FALSE)
+    {
+        std::cout << "compilation of vertex shader failed." << std::endl;
+        return false;
+    }
+    else
+    {
+        std::cout << "successfully compiled fragment shader." << std::endl;
+    }
+
+    progTreeNode = glCreateProgram();
+
+    glAttachShader(progTreeNode,vertexShader);
+    glAttachShader(progTreeNode,fragmentShader);
+
+    glLinkProgram(progTreeNode);
+
+    glDetachShader(progTreeNode,vertexShader);
+    glDetachShader(progTreeNode,fragmentShader);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
     return true;
 }
@@ -176,11 +311,11 @@ bool Renderer::parseData(Compound *c)
 
 
     //calculate radial positions for treenodes
-    setRadialPosition(c,t,0.0f,360.0f,0.1f);
+    setRadialPosition(c,t,0.0f,360.0f,0.17f);
 
     //write pathes to buffer, first Point2D determines length of Path, e.g.(Point2D(3,3) next three entries are one path
     const std::vector<std::pair<NodeId,NodeId>>* leaves = c->get_connections();
-    for(unsigned int i = 0;i <leaves->size();++i)
+   for(unsigned int i = 0;i <leaves->size();++i)
     {
         //find connection and shortest path, push back into pathBuffer
 
@@ -193,20 +328,27 @@ bool Renderer::parseData(Compound *c)
             controlpoints.push_back(c->get_node(p.nodes.at(j))->get_position());
         }
 
-        std::vector<Point2D> spline = createSplines(controlpoints,50);
 
+        createSplines(mSplineBuffer.data,controlpoints,stepsize);
     }
+    std::cout << "created Splines" << std::endl;
 
+//    mPathBuffer.data = createSplines(controlPoints,50);
+
+    glBindBuffer(GL_ARRAY_BUFFER,mSplineBuffer.id);
+    glBufferData(GL_ARRAY_BUFFER,mSplineBuffer.data.size() * sizeof(Point2D),NULL,GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER,0,mSplineBuffer.data.size() * sizeof(Point2D),mSplineBuffer.data.data());
+    glBindBuffer(GL_ARRAY_BUFFER,0);
 
    //send node positions to opengl
    glBindBuffer(GL_ARRAY_BUFFER,mTreeNodeBuffer.id);
-   glBufferData(GL_ARRAY_BUFFER,mTreeNodeBuffer.data.size() * sizeof(Point2D),mTreeNodeBuffer.data.data(),GL_STATIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER,mTreeNodeBuffer.data.size() * sizeof(Point2D),NULL,GL_STATIC_DRAW);
    glBufferSubData(GL_ARRAY_BUFFER,0,mTreeNodeBuffer.data.size()* sizeof(Point2D),mTreeNodeBuffer.data.data());
    glBindBuffer(GL_ARRAY_BUFFER,0);
 
    //send nodeConnections to opengl
    glBindBuffer(GL_ARRAY_BUFFER,mTreeConnectionBuffer.id);
-   glBufferData(GL_ARRAY_BUFFER,mTreeConnectionBuffer.data.size() * sizeof(Point2D),mTreeConnectionBuffer.data.data(),GL_STATIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER,mTreeConnectionBuffer.data.size() * sizeof(Point2D),NULL,GL_STATIC_DRAW);
    glBufferSubData(GL_ARRAY_BUFFER,0,mTreeConnectionBuffer.data.size() * sizeof(Point2D),mTreeConnectionBuffer.data.data());
    glBindBuffer(GL_ARRAY_BUFFER,0);
 
@@ -237,6 +379,8 @@ void Renderer::display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     renderTree();
+    renderSplines();
+    renderNodes();
     //display rendered image
     glutSwapBuffers();
 
@@ -248,17 +392,42 @@ void Renderer::display()
 
 void Renderer::renderTree()
 {
-    glUseProgram(progTree);
+    glUseProgram(progTreeConn);
+    glBindVertexArray(vaoTreeConn);
+    glEnableVertexAttribArray(0);
     glDrawArrays(GL_LINES,0,mTreeConnectionBuffer.data.size());
-    glDrawArrays(GL_POINTS,0,mTreeConnectionBuffer.data.size());
-    //ugly fix for blue center
-    glDrawArrays(GL_POINTS,0,1);
+    glDisableVertexAttribArray(0);
+    glBindVertexArray(0);
     glUseProgram(0);
 }
 
 void Renderer::renderSplines()
 {
-    //glUseProgram(progSplines);
+    glUseProgram(progSpline);
+    glBindVertexArray(vaoSpline);
+    glEnableVertexAttribArray(0);
+    for(unsigned int i = 0;i < mSplineBuffer.data.size();i+=stepsize)
+    {
+        glDrawArrays(GL_LINE_STRIP,i,stepsize);
+    }
+    glDisableVertexAttribArray(0);
+    glBindVertexArray(0);
+    glUseProgram(0);
+}
+
+void Renderer::renderNodes()
+{
+    glUseProgram(progTreeNode);
+
+    glBindVertexArray(vaoTreeNode);
+
+    glEnableVertexAttribArray(0);
+
+    glDrawArrays(GL_POINTS,0,mTreeNodeBuffer.data.size());
+
+    glDisableVertexAttribArray(0);
+    glBindVertexArray(0);
+    glUseProgram(0);
 }
 
 void Renderer::keyboard(unsigned char key, int x, int y)
@@ -422,9 +591,8 @@ void Renderer::fillBuffer(TreeNode *parent, TreeNode *node)
 
 //controlPoints: points of control polygon
 //steps : steps of t
-std::vector<Point2D> Renderer::createSplines(const std::vector<Point2D> &controlPoints,float steps)
+void Renderer::createSplines(std::vector<Point2D> &spline,const std::vector<Point2D> &controlPoints,float steps)
 {
-    std::vector<Point2D> result;
     //TODO: create cubic B-Spline with uniform parameterization
     //for uniform parameterization, first control points interpolates t0 up to t3 with 0,
     //each t for each Point is the number of the point
@@ -432,13 +600,77 @@ std::vector<Point2D> Renderer::createSplines(const std::vector<Point2D> &control
     //steps determines the number of returning spline points, e.g. steps = 50, return 50 interpolated points on the spline
     //Have fun
 
-    for(unsigned int i = 0;i < steps;++i)
+    std::vector<float> knotsequence;
+
+    //degree
+    int degree = 3;
+    int order = degree+1;
+    //interpolate first point
+    knotsequence.push_back(0);
+    knotsequence.push_back(0);
+    knotsequence.push_back(0);
+    knotsequence.push_back(0);
+    int knotindex = 1;
+    for(unsigned int i = order;i < (controlPoints.size());++i)
     {
+        knotsequence.push_back(knotindex);
+        knotindex++;
+    }
+
+
+    //interpolate last point
+    knotsequence.push_back(controlPoints.size()-degree);
+    knotsequence.push_back(controlPoints.size()-degree);
+    knotsequence.push_back(controlPoints.size()-degree);
+    knotsequence.push_back(controlPoints.size()-degree);
+
+    for(unsigned int l = 0;l < steps;++l)
+    {
+
         //parameter to determine point on curve
-        float t = i * (controlPoints.size()-1)/(steps-1);
+        float t = l * knotsequence.at(knotsequence.size()-1)/(steps-1);
+        //find startIndex
+        int r = degree + floor(t);
+        if(t == knotsequence.at(knotsequence.size()-1))
+        {
+            spline.push_back(controlPoints.at(controlPoints.size()-1));
+            continue;
+        }
+        //find points used to calculate point on spline
+        std::vector<Point2D> iterationPoints;
+
+        for(unsigned int j = r - order + 1;j <= r;++j)
+        {
+            iterationPoints.push_back(controlPoints.at(j));
+        }
+
+        for(unsigned int j = 1;j <= degree;++j)
+        {
+            for( int i = r;i >= r - order +1 + j;--i)
+            {
+                Point2D d1 = iterationPoints.at(i-1-floor(t)) * (1-alpha(t,knotsequence.at(i),knotsequence.at(i+order-j)));
+
+                Point2D d2 =  iterationPoints.at(i-floor(t)) * alpha(t,knotsequence.at(i),knotsequence.at(i+order-j));
+                iterationPoints.at(i-(floor(t))) =   d1+d2;
+            }
+        }
+
+        spline.push_back(iterationPoints.at(iterationPoints.size()-1));
 
     }
 
+}
+
+float Renderer::alpha(float t, float ti, float tikj)
+{
+    float a1 = t-ti;
+    float a2 = tikj-ti;
+
+    if(a2 == 0)
+    {
+        return 0;
+    }
+    float result = (t-ti)/(tikj-ti);
     return result;
 }
 

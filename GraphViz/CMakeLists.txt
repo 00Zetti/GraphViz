@@ -59,10 +59,12 @@ add_executable(${PROJECT_NAME} ${SRC_LIST}
         include/config.h
 
         #SHADER
-        shader/vertexShader.vert
-        shader/fragmentShader.frag
+        shader/connVertexShader.vert
+        shader/connFragmentShader.frag
 	shader/splineVertexShader.vert
 	shader/splineFragmentShader.frag
+	shader/nodeVertexShader.vert
+	shader/nodeFragmentShader.frag
 )
 
 target_link_libraries(GraphViz ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARIES})
