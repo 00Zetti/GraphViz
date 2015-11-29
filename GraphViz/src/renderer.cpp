@@ -17,6 +17,7 @@ Renderer::Buffer<Point2D> Renderer::mTreeNodeBuffer;
 Renderer::Buffer<Point2D> Renderer::mSplineBuffer;
 Renderer::Buffer<Point2D> Renderer::mSplineControlBuffer;
 Renderer::Buffer<float>   Renderer::mSplineTBuffer;
+Renderer::Buffer<float>   Renderer::mSplineOpacityBuffer;
 GLuint Renderer::vaoTreeConn = -1;
 GLuint Renderer::vaoSpline = -1;
 GLuint Renderer::vaoTreeNode = -1;
@@ -25,7 +26,14 @@ GLuint Renderer::progSpline = 0;
 GLuint Renderer::progTreeNode = 0;
 
 int Renderer::stepsize = 50;
-float Renderer::beta = 0.5f;
+Renderer::uVar<float> Renderer::beta;
+Renderer::uVar<float> Renderer::minAlpha;
+Renderer::uVar<float> Renderer::maxAlpha;
+
+
+bool Renderer::showLeaves = true;
+bool Renderer::showTree = true;
+bool Renderer::showSplines = true;
 
 bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int height)
 {
@@ -61,6 +69,15 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
     glEnable(GL_MULTISAMPLE);
     glPointSize(5.0f);
     glLineWidth(2.0f);
+
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glHint(GL_LINE_SMOOTH_HINT,GL_DONT_CARE);
+
+    beta.value = 0.0f;
+    minAlpha.value = 0.2f;
+    maxAlpha.value = 0.7f;
 
     return true;
 }
@@ -142,6 +159,18 @@ bool Renderer::initBuffers()
                           0,
                           0);
     glBindBuffer(GL_ARRAY_BUFFER,0);
+
+    glGenBuffers(1,&mSplineOpacityBuffer.id);
+    glBindBuffer(GL_ARRAY_BUFFER,mSplineOpacityBuffer.id);
+    glBufferData(GL_ARRAY_BUFFER,0,NULL,GL_STATIC_DRAW);
+
+    glVertexAttribPointer(3,
+                          1,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          0,
+                          0);
+    glBindBuffer(GL_ARRAY_BUFFER,0);
     glBindVertexArray(0);
 
     return true;
@@ -174,7 +203,7 @@ bool Renderer::initProgram()
 
     if(success == GL_FALSE)
     {
-        std::cout << "compilation of vertex shader failed." << std::endl;
+        std::cout << "compilation of vertex shader failed." << vertexSource << std::endl;
         return false;
     }
     else
@@ -201,7 +230,7 @@ bool Renderer::initProgram()
 
     if(success == GL_FALSE)
     {
-        std::cout << "compilation of vertex shader failed." << std::endl;
+        std::cout << "compilation of vertex shader failed. " << fragmentSource << std::endl;
         return false;
     }
     else
@@ -238,7 +267,7 @@ bool Renderer::initProgram()
 
     if(success == GL_FALSE)
     {
-        std::cout << "compilation of vertex shader failed." << std::endl;
+        std::cout << "compilation of vertex shader failed." << vertexSource << std::endl;
         return false;
     }
     else
@@ -258,7 +287,7 @@ bool Renderer::initProgram()
 
     if(success == GL_FALSE)
     {
-        std::cout << "compilation of vertex shader failed." << std::endl;
+        std::cout << "compilation of vertex shader failed." << fragmentSource << std::endl;
         return false;
     }
     else
@@ -290,7 +319,7 @@ bool Renderer::initProgram()
 
     if(success == GL_FALSE)
     {
-        std::cout << "compilation of vertex shader failed." << std::endl;
+        std::cout << "compilation of vertex shader failed." << vertexSource << std::endl;
         return false;
     }
     else
@@ -309,7 +338,7 @@ bool Renderer::initProgram()
 
     if(success == GL_FALSE)
     {
-        std::cout << "compilation of vertex shader failed." << std::endl;
+        std::cout << "compilation of vertex shader failed." << fragmentSource << std::endl;
         return false;
     }
     else
@@ -330,6 +359,8 @@ bool Renderer::initProgram()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+
+
     return true;
 }
 
@@ -341,7 +372,6 @@ bool Renderer::parseData(Compound *c)
 
     //calculate radial positions for treenodes
     setRadialPosition(c,t,0.0f,360.0f,0.17f);
-
     //write pathes to buffer, first Point2D determines length of Path, e.g.(Point2D(3,3) next three entries are one path
     const std::vector<std::pair<NodeId,NodeId>>* leaves = c->get_connections();
    for(unsigned int i = 0;i <leaves->size();++i)
@@ -387,8 +417,13 @@ bool Renderer::parseData(Compound *c)
    glBindBuffer(GL_ARRAY_BUFFER,0);
 
    glBindBuffer(GL_ARRAY_BUFFER,mSplineTBuffer.id);
-   glBufferData(GL_ARRAY_BUFFER,mSplineTBuffer.data.size() * sizeof(Point2D),NULL,GL_STATIC_DRAW);
-   glBufferSubData(GL_ARRAY_BUFFER,0,mSplineTBuffer.data.size() * sizeof(Point2D), mSplineTBuffer.data.data());
+   glBufferData(GL_ARRAY_BUFFER,mSplineTBuffer.data.size() * sizeof(float),NULL,GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER,0,mSplineTBuffer.data.size() * sizeof(float), mSplineTBuffer.data.data());
+   glBindBuffer(GL_ARRAY_BUFFER,0);
+
+   glBindBuffer(GL_ARRAY_BUFFER,mSplineOpacityBuffer.id);
+   glBufferData(GL_ARRAY_BUFFER,mSplineOpacityBuffer.data.size() * sizeof(float),NULL,GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER,0,mSplineOpacityBuffer.data.size() * sizeof(float), mSplineOpacityBuffer.data.data());
    glBindBuffer(GL_ARRAY_BUFFER,0);
 
     return true;
@@ -402,7 +437,6 @@ void Renderer::run()
     gluPerspective(45.0,1,0.1,100);
     glMatrixMode(GL_MODELVIEW);
     glViewport(0,0,mWidth,mHeight);
-
 	//run Main Loop
 
     glutMainLoop();
@@ -420,10 +454,19 @@ void Renderer::display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+    if(showTree)
+    {
+        renderTree();
+    }
+    if(showSplines)
+    {
+        renderSplines();
+    }
+    if(showLeaves)
+    {
+        renderNodes();
+    }
 
-    renderTree();
-    renderSplines();
-    renderNodes();
     //display rendered image
     glutSwapBuffers();
 
@@ -436,6 +479,15 @@ void Renderer::display()
 void Renderer::renderTree()
 {
     glUseProgram(progTreeConn);
+
+    minAlpha.id = glGetUniformLocation(progSpline,"minAlpha");
+    maxAlpha.id = glGetUniformLocation(progSpline,"maxAlpha");
+    beta.id = glGetUniformLocation(progSpline,"beta");
+
+    glUniform1f(minAlpha.id,minAlpha.value);
+    glUniform1f(maxAlpha.id,maxAlpha.value);
+    glUniform1f(beta.id,beta.value);
+
     glBindVertexArray(vaoTreeConn);
     glEnableVertexAttribArray(0);
     glDrawArrays(GL_LINES,0,mTreeConnectionBuffer.data.size());
@@ -449,19 +501,28 @@ void Renderer::renderSplines()
     glUseProgram(progSpline);
     glBindVertexArray(vaoSpline);
 
-    GLint betaID = glGetUniformLocation(progSpline,"beta");
+    beta.id = glGetUniformLocation(progSpline,"beta");
 
-    glUniform1f(betaID,beta);
+    minAlpha.id = glGetUniformLocation(progSpline,"minAlpha");
+
+    maxAlpha.id = glGetUniformLocation(progSpline,"maxAlpha");
+    glUniform1f(beta.id,beta.value);
+    glUniform1f(minAlpha.id,minAlpha.value);
+    glUniform1f(maxAlpha.id,maxAlpha.value);
+
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
     for(unsigned int i = 0;i < mSplineBuffer.data.size();i+=stepsize)
     {
-        glDrawArrays(GL_LINE_STRIP,i,stepsize);
+        glDrawArraysInstanced(GL_LINE_STRIP,i,stepsize,1);
     }
+
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);
+    glDisableVertexAttribArray(3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
@@ -487,12 +548,20 @@ void Renderer::keyboard(unsigned char key, int x, int y)
     //last to call
     switch(key)
     {
-    case 'm' : beta+= 0.01f;break;
-    case 'n' : beta-= 0.01f;break;
-       default: break;
+    case '1' : beta.value-= 0.01f;;break;
+    case '2' : beta.value+= 0.01f;break;
+    case '3' : minAlpha.value-= 0.01f;break;
+    case '4' : minAlpha.value+= 0.01f;break;
+    case '5' : maxAlpha.value-= 0.01f;break;
+    case '6' : maxAlpha.value+= 0.01f;break;
+    case 'b' : showLeaves = !showLeaves;break;
+    case 'n' : showTree = !showTree;break;
+    case 'm' : showSplines = !showSplines;break;
+    default  : break;
     }
-    beta = beta < 0.0f ? 0.0f : beta;
-    beta = beta > 1.0f ? 1.0f : beta;
+    validRange(beta.value,0.0f,1.0f);
+    validRange(minAlpha.value,0.0f,1.0f);
+    validRange(maxAlpha.value,0.0f,1.0f);
     glutPostRedisplay();
 }
 
@@ -593,12 +662,10 @@ void Renderer::setRadialPosition(Compound* c,TreeNode* t, float angleMin, float 
     //TODO: decide wether to use bisector or tangent as limits
 
     //check if root
-    std::cout << "Node:" << t->get_id().to_string() << std::endl;
     if(t->get_level() == 0)
     {
         //set root to center
         t->set_position(Point2D(0.0f,0.0f));
-        std::cout << "Position: ["<<t->get_position().x <<"|"<<t->get_position().y << "]"<< std::endl;
 
         mTreeNodeBuffer.data.push_back(t->get_position());
     }
@@ -611,7 +678,6 @@ void Renderer::setRadialPosition(Compound* c,TreeNode* t, float angleMin, float 
         float x = radius*(sin(angle)) * t->get_level();
         float y = radius*(cos(angle)) * t->get_level();
         t->set_position(Point2D(x,y));
-        std::cout << "Position: ["<<t->get_position().x <<"|"<<t->get_position().y << "]" << std::endl;
         fillBuffer(c->get_node(t->get_parent_id()),t);
     }
     float tempMax = 0.0f;
@@ -644,7 +710,10 @@ void Renderer::fillBuffer(TreeNode *parent, TreeNode *node)
     if(node != NULL)
     {
         mTreeConnectionBuffer.data.push_back(node->get_position());
-        mTreeNodeBuffer.data.push_back(node->get_position());
+        if(node->get_num_children() == 0)
+        {
+            mTreeNodeBuffer.data.push_back(node->get_position());
+        }
     }
 }
 
@@ -678,6 +747,11 @@ void Renderer::createSplines(std::vector<Point2D> &spline,const std::vector<Poin
         knotsequence.push_back(controlPoints.size()-degree);
     }
 
+    for( unsigned int i = 0;i < stepsize;++i)
+    {
+            mSplineOpacityBuffer.data.push_back(float(controlPoints.size()));
+    }
+
 
     //loop over every step, create steps many points on spline
     for(unsigned int l = 0;l < stepsize;++l)
@@ -694,7 +768,16 @@ void Renderer::createSplines(std::vector<Point2D> &spline,const std::vector<Poin
             mSplineControlBuffer.data.push_back(first);
             mSplineControlBuffer.data.push_back(last);
             mSplineTBuffer.data.push_back(float(l)/float(stepsize));
+
             spline.push_back(controlPoints.at(controlPoints.size()-1));
+            continue;
+        }
+        if(t == knotsequence.at(0))
+        {
+            mSplineControlBuffer.data.push_back(first);
+            mSplineControlBuffer.data.push_back(last);
+            mSplineTBuffer.data.push_back(0.0f);
+            spline.push_back(controlPoints.at(0));
             continue;
         }
         //find points used to calculate point on spline
@@ -716,15 +799,10 @@ void Renderer::createSplines(std::vector<Point2D> &spline,const std::vector<Poin
             }
         }
 
-
-        //TODO beta parameter
-
         Point2D old = iterationPoints.at(iterationPoints.size()-1);
         mSplineControlBuffer.data.push_back(first);
         mSplineControlBuffer.data.push_back(last);
-        std::cout << "L:" << l << " stepsize" << stepsize << "STEPSIZE" << float(l)/float(stepsize) << std::endl;
         mSplineTBuffer.data.push_back(float(l)/float(stepsize));
-        //old = old * beta + (first + (last -first) * (t/(controlPoints.size()-degree))) * (1.0f-beta);
 
         spline.push_back(old);
 
@@ -743,5 +821,11 @@ float Renderer::alpha(float t, float ti, float tikj)
     }
     float result = (t-ti)/(tikj-ti);
     return result;
+}
+
+void Renderer::validRange(float &p,float min, float max)
+{
+    p = p < min ? min : p;
+    p = p > max ? max : p;
 }
 

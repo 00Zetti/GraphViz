@@ -30,6 +30,15 @@ private:
         std::vector<T> data;
     };
 
+    template<typename T>
+    struct uVar
+    {
+        uVar<T>() : id(-1)
+        {}
+        GLuint id;
+        T value;
+    };
+
 	//mouseState
     typedef enum
     {
@@ -54,6 +63,7 @@ private:
     static Buffer<Point2D>  mTreeNodeBuffer;        //display nodes
     static Buffer<Point2D>  mSplineControlBuffer;
     static Buffer<float>    mSplineTBuffer;
+    static Buffer<float>    mSplineOpacityBuffer;
 	//Buffer for visualising pathes
     static Buffer<Point2D> mSplineBuffer;             //display pathes between nodes
 
@@ -64,7 +74,14 @@ private:
     static GLuint progSpline;                      //display Splines
     static GLuint progTreeNode;
     static int    stepsize;
-    static float beta;
+
+    static uVar<float> minAlpha;
+    static uVar<float> maxAlpha;
+    static uVar<float> beta;
+
+    static bool showTree;
+    static bool showLeaves;
+    static bool showSplines;
 
 //functions
 public:
@@ -106,6 +123,7 @@ private:
     static void renderNodes();
     static void createSplines(std::vector<Point2D> &spline,const std::vector<Point2D> &controlPoints);
     static float alpha(float t, float ti, float tikj);
+    static void validRange(float &p,float min, float max);
 
 };
 
