@@ -89,6 +89,8 @@ class TreeNode {
         // possibly expensive as it copies the whole vector of children
         vector<NodeId> get_child_ids() const;
 
+        const vector<NodeId>* get_const_child_ids() const;
+
         // possibly expensive as it copies the whole vector of connections
         vector<ConnId> get_connection_ids() const;
 
