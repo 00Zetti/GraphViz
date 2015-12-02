@@ -63,6 +63,8 @@ add_executable(${PROJECT_NAME} ${SRC_LIST}
         shader/connFragmentShader.frag
 	shader/splineVertexShader.vert
 	shader/splineFragmentShader.frag
+	shader/splineSortFragmentShader.frag
+        shader/splineSortVertexShader.vert
 	shader/nodeVertexShader.vert
 	shader/nodeFragmentShader.frag
 )

@@ -43,7 +43,7 @@ private:
     typedef enum
     {
         IDLE = 0,
-        ZOOM = 1
+        SET = 1
     }MOUSESTATE;
 
 //variables
@@ -73,6 +73,7 @@ private:
     static GLuint progTreeConn;                         //display Tree
     static GLuint progSpline;                      //display Splines
     static GLuint progTreeNode;
+    static GLuint progSelectSpline;
     static int    stepsize;
 
     static uVar<float> minAlpha;
@@ -82,6 +83,21 @@ private:
     static bool showTree;
     static bool showLeaves;
     static bool showSplines;
+
+    static Point2D mMousePosition;
+    static GLuint mMousePositionID;
+
+    static Point2D mMouseOldPosition;
+
+    static Point2D mTempMouse;
+    static Point2D mTempMouseOld;
+
+    //texture shit
+    static GLuint frameBuffer;
+    static GLuint colorBuffer;
+
+    static uVar<float> splineIndex;
+    static bool selected;
 
 //functions
 public:
@@ -111,19 +127,27 @@ private:
     static void     resize(int width,int height);
     static void     idle();
 
-	//read Shader into String
-    static std::string readFile(const std::string &source);
 
+    //calculation
     static void setRadialPosition(Compound *c, TreeNode* t, float angleMin, float angleMax, float radius);
+    static void createSplines(std::vector<Point2D> &spline,const std::vector<Point2D> &controlPoints);
 
 
-    static void fillBuffer(TreeNode* parent, TreeNode* node);
     static void renderTree();
     static void renderSplines();
     static void renderNodes();
-    static void createSplines(std::vector<Point2D> &spline,const std::vector<Point2D> &controlPoints);
+
+    //helper functions
     static float alpha(float t, float ti, float tikj);
     static void validRange(float &p,float min, float max);
+    static void fillBuffer(TreeNode* parent, TreeNode* node);
+    static std::string readFile(const std::string &source);
+
+    template <typename T>
+    static void copyBufferDataToGL(GLenum bufferType, Buffer<T> &buffer,GLenum draw);
+    static void checkShader(GLuint shader,const std::string &name);
+    static GLuint createShader(const std::string &source,GLenum shaderType);
+    static GLuint createProgram(GLuint vertexShader, GLuint fragmentShader);
 
 };
 
