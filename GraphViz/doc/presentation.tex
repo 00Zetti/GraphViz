@@ -1,0 +1,129 @@
+\documentclass[11pt]{beamer}
+\usetheme{Rochester}
+\usecolortheme{seagull}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{textpos}
+
+% add logo to the sections
+\addtobeamertemplate{frametitle}{}{%
+\begin{textblock*}{100mm}(.6\textwidth,-1.2cm)
+\includegraphics[width=0.5\linewidth]{./logo_inf_fak.png}
+\end{textblock*}}
+
+
+\setbeamertemplate{footline}[frame number]
+
+\author{Größler, Hofmann, Zettwitz, Sopauschke, Sturm, Solovjova}
+\title{A visualization technique for \\  hierarchical edge bundles}
+\date{21.Januar 2016} 
+%\setbeamercovered{transparent}  
+%\subject{}
+
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{Inhalt} 
+\tableofcontents
+\end{frame}
+
+
+\section{Ziel des Projekts}
+\begin{frame}
+\frametitle{Ziel des Projekts}
+\begin{itemize} 
+\item hierarchische Graphdaten (Baum)
+\item Radiales Layout der Graphdaten
+\item B ündelung der Graphdaten zu B-Splines
+\item RT/interaktive Visulaisierung
+\end{itemize}
+\end{frame}
+
+
+
+\section{Compound Graph}
+\begin{frame}[allowframebreaks]
+\frametitle{Compound Graph}
+
+Compound Graph components:
+\begin{itemize} 
+\item Knoten (parent, children)                                                                                                                       
+\item Level, Link, Position(x,y)
+\item Anzahl an Kindern auf allen Leveln
+\end{itemize}
+
+\framebreak
+\begin{itemize} 
+\item Pfad nur von Blatt zu Blatt
+\item Shortest path: von beiden Endpunkten aufsteigen \\ bis gemeinsamer Knoten erreicht wurde
+\item Speichere jeden besuchten Knoten (später für Splines benötigt)
+\end{itemize}
+
+%Übersichtsbild der Klassen einfügen
+
+\end{frame}
+
+
+
+\section{Splines}
+\begin{frame}
+\frametitle{Splines}
+\begin{itemize}
+\item dummy splines allgemein
+\end{itemize}
+
+\end{frame}
+
+
+
+\subsection{B-Splines}
+\begin{frame}
+\frametitle{B-Splines}
+
+\begin{itemize}
+\item dummy
+\end{itemize}
+
+\end{frame}
+
+
+
+\section{Technnisches System}
+\begin{frame}
+\frametitle{Technisches System}
+\begin{itemize}
+\item dummy cross platform, OGL, GCC, GLUT, GLEW, CMAKE...
+\end{itemize}
+
+\end{frame}
+
+
+
+\section{Demo}
+\begin{frame}
+\frametitle{Demo}
+Es folgt eine kurze Demonstration unserer Ergebnisse
+
+\end{frame}
+
+
+\section{Nutzen}
+\begin{frame}
+\frametitle{Nutzen}
+\begin{itemize}
+\item Datenexplorariton...
+\end{itemize}
+
+\end{frame}
+
+
+\end{document}

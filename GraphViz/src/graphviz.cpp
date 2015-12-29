@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     com.get_node(root)->set_position(Point2D(0.0, 0.0));
 
     // print compound graph
-    cout << com.to_string() << endl;
+    //cout << com.to_string() << endl;
 
     if(!Renderer::initGLUT(argc,argv,800,800))
     {

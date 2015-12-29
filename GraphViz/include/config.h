@@ -1,1 +1,1 @@
-#define VIZ_DIR "/home/michael/Development/GraphViz/GraphViz/GraphViz/shader"
+#define VIZ_DIR "/home/martin/Dev/GraphViz/GraphViz/shader"
