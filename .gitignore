@@ -29,3 +29,30 @@
 
 #build directory
 GraphViz/build/
+/build-GraphViz-Desktop_Qt_5_5_1_GCC_64bit-Default/
+
+# tex files
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.synctex.gz
+*.pdf
