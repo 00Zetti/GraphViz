@@ -394,7 +394,7 @@ void Renderer::keyboard(unsigned char key, int x, int y)
 
     switch(key)
     {
-    case '1' : beta.value-= 0.01f;;break;
+    case '1' : beta.value-= 0.01f;break;
     case '2' : beta.value+= 0.01f;break;
     case '3' : minAlpha.value-= 0.01f;break;
     case '4' : minAlpha.value+= 0.01f;break;
@@ -406,7 +406,7 @@ void Renderer::keyboard(unsigned char key, int x, int y)
     default  : break;
     }
 
-    //check if parameter ist still in range
+    //check if parameter is still in range
     validRange(beta.value,0.0f,1.0f);
     validRange(minAlpha.value,0.0f,1.0f);
     validRange(maxAlpha.value,0.0f,1.0f);

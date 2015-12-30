@@ -53,3 +53,6 @@ Freeglut : 	http://freeglut.sourceforge.net/index.php#download
 GLEW : 		http://glew.sourceforge.net/
 
 while running CMake, specify your pathes to LIB and INCLUDE directories.
+
+## LaTeX
+If some packages are missing - just install the missing packages or easily the whole "texlive-full" package(Ubuntu).

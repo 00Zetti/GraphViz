@@ -43,8 +43,8 @@
 \begin{itemize} 
 \item hierarchische Graphdaten (Baum)
 \item Radiales Layout der Graphdaten
-\item B ündelung der Graphdaten zu B-Splines
-\item RT/interaktive Visulaisierung
+\item Bündelung der Graphdaten(Pfade) durch B-Splines
+\item Echtzeit/interaktive Visulaisierung
 \end{itemize}
 \end{frame}
 
@@ -54,18 +54,20 @@
 \begin{frame}[allowframebreaks]
 \frametitle{Compound Graph}
 
-Compound Graph components:
+Compound Graph Bestandteile:
 \begin{itemize} 
-\item Knoten (parent, children)                                                                                                                       
-\item Level, Link, Position(x,y)
+\item Wurzel
+\item Knoten (Eltern, Kind)                                                                                                                       
+\item Level, Link(Ziel), Position(x,y)
 \item Anzahl an Kindern auf allen Leveln
 \end{itemize}
 
 \framebreak
 \begin{itemize} 
 \item Pfad nur von Blatt zu Blatt
-\item Shortest path: von beiden Endpunkten aufsteigen \\ bis gemeinsamer Knoten erreicht wurde
+\item Shortest path: von beiden Endpunkten aufsteigen, \\ bis gemeinsamer Knoten erreicht wurde
 \item Speichere jeden besuchten Knoten (später für Splines benötigt)
+\item Zufallsgenerierung: \#Level, \#Knoten, \#avg. Kinder, \#Links
 \end{itemize}
 
 %Übersichtsbild der Klassen einfügen
@@ -77,6 +79,7 @@ Compound Graph components:
 \section{Splines}
 \begin{frame}
 \frametitle{Splines}
+
 \begin{itemize}
 \item dummy splines allgemein
 \end{itemize}
@@ -100,8 +103,14 @@ Compound Graph components:
 \section{Technnisches System}
 \begin{frame}
 \frametitle{Technisches System}
+
 \begin{itemize}
-\item dummy cross platform, OGL, GCC, GLUT, GLEW, CMAKE...
+\item Cross-platform: gestestet unter Windows 8, Ubuntu 14.04
+\item Cmake als build-tool
+\item OpenGL(GLUT, GLEW) als plattformunabhängige  
+\\ Anbindung an Grafikkarte -> schnell(GPU beschleunigt) 
+\item Erzeugung des Graphen auf CPU
+\item Berechnung der Splines, Rendering auf GPU (Shader)
 \end{itemize}
 
 \end{frame}
@@ -111,6 +120,7 @@ Compound Graph components:
 \section{Demo}
 \begin{frame}
 \frametitle{Demo}
+
 Es folgt eine kurze Demonstration unserer Ergebnisse
 
 \end{frame}
@@ -119,8 +129,10 @@ Es folgt eine kurze Demonstration unserer Ergebnisse
 \section{Nutzen}
 \begin{frame}
 \frametitle{Nutzen}
+
 \begin{itemize}
 \item Datenexploration...
+\item Erweiterung: allgemeine Graphen (durch betweeness centrality)
 \end{itemize}
 
 \end{frame}
