@@ -15,31 +15,36 @@
 \headcommand {\beamer@framepages {4}{4}}
 \headcommand {\slideentry {2}{0}{4}{4/5}{}{0}}
 \headcommand {\beamer@framepages {4}{5}}
-\headcommand {\sectionentry {3}{Splines}{6}{Splines}{0}}
+\headcommand {\sectionentry {3}{Radial Layout}{6}{Radial Layout}{0}}
 \headcommand {\beamer@sectionpages {4}{5}}
 \headcommand {\beamer@subsectionpages {4}{5}}
 \headcommand {\slideentry {3}{0}{5}{6/6}{}{0}}
 \headcommand {\beamer@framepages {6}{6}}
-\headcommand {\beamer@subsectionentry {0}{3}{1}{7}{B-Splines}}\headcommand {\beamer@subsectionpages {6}{6}}
-\headcommand {\slideentry {3}{1}{1}{7/7}{B-Splines}{0}}
+\headcommand {\sectionentry {4}{Splines}{7}{Splines}{0}}
+\headcommand {\beamer@sectionpages {6}{6}}
+\headcommand {\beamer@subsectionpages {6}{6}}
+\headcommand {\slideentry {4}{0}{6}{7/7}{}{0}}
 \headcommand {\beamer@framepages {7}{7}}
-\headcommand {\sectionentry {4}{Technnisches System}{8}{Technnisches System}{0}}
-\headcommand {\beamer@sectionpages {6}{7}}
-\headcommand {\beamer@subsectionpages {7}{7}}
-\headcommand {\slideentry {4}{0}{2}{8/8}{}{0}}
+\headcommand {\beamer@subsectionentry {0}{4}{1}{8}{B-Splines}}\headcommand {\beamer@subsectionpages {7}{7}}
+\headcommand {\slideentry {4}{1}{1}{8/8}{B-Splines}{0}}
 \headcommand {\beamer@framepages {8}{8}}
-\headcommand {\sectionentry {5}{Demo}{9}{Demo}{0}}
-\headcommand {\beamer@sectionpages {8}{8}}
+\headcommand {\sectionentry {5}{Technnisches System}{9}{Technnisches System}{0}}
+\headcommand {\beamer@sectionpages {7}{8}}
 \headcommand {\beamer@subsectionpages {8}{8}}
-\headcommand {\slideentry {5}{0}{3}{9/9}{}{0}}
+\headcommand {\slideentry {5}{0}{2}{9/9}{}{0}}
 \headcommand {\beamer@framepages {9}{9}}
-\headcommand {\sectionentry {6}{Nutzen}{10}{Nutzen}{0}}
+\headcommand {\sectionentry {6}{Demo}{10}{Demo}{0}}
 \headcommand {\beamer@sectionpages {9}{9}}
 \headcommand {\beamer@subsectionpages {9}{9}}
-\headcommand {\slideentry {6}{0}{4}{10/10}{}{0}}
+\headcommand {\slideentry {6}{0}{3}{10/10}{}{0}}
 \headcommand {\beamer@framepages {10}{10}}
-\headcommand {\beamer@partpages {1}{10}}
-\headcommand {\beamer@subsectionpages {10}{10}}
+\headcommand {\sectionentry {7}{Nutzen und Erweiterung}{11}{Nutzen und Erweiterung}{0}}
 \headcommand {\beamer@sectionpages {10}{10}}
-\headcommand {\beamer@documentpages {10}}
-\headcommand {\def \inserttotalframenumber {10}}
+\headcommand {\beamer@subsectionpages {10}{10}}
+\headcommand {\slideentry {7}{0}{4}{11/11}{}{0}}
+\headcommand {\beamer@framepages {11}{11}}
+\headcommand {\beamer@partpages {1}{11}}
+\headcommand {\beamer@subsectionpages {11}{11}}
+\headcommand {\beamer@sectionpages {11}{11}}
+\headcommand {\beamer@documentpages {11}}
+\headcommand {\def \inserttotalframenumber {11}}
