@@ -56,3 +56,6 @@ GraphViz/build/
 *.out
 *.synctex.gz
 *.pdf
+build/
+GraphViz-build/
+GraphViz/doc/Thumbs.db

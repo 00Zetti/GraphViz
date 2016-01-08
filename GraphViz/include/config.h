@@ -1,1 +1,1 @@
-#define VIZ_DIR "/home/martin/Dev/GraphViz/GraphViz/shader"
+#define VIZ_DIR "C:\\Users\\Zettman\\Dev\\GraphViz\\GraphViz\\shader"
