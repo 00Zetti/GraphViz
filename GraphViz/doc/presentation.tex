@@ -12,7 +12,7 @@
 % add logo to the sections
 \addtobeamertemplate{frametitle}{}{%
 \begin{textblock*}{100mm}(.6\textwidth,-1.2cm)
-\includegraphics[width=0.5\linewidth]{./logo_inf_fak.eps}
+\includegraphics[width=0.5\linewidth]{./logo_inf_fak.png}
 \end{textblock*}}
 
 
@@ -44,7 +44,7 @@
 \item hierarchische Graphdaten (Baum)
 \item Radiales Layout der Graphdaten
 \item Bündelung der Graphdaten(Pfade) durch B-Splines
-\item Echtzeit/interaktive Visulaisierung
+\item Echtzeit/interaktive Visualisierung
 \end{itemize}
 \end{frame}
 
@@ -68,15 +68,15 @@ Visualization of Adjacency Relations in Hierarchical Data
 \item balloon tree
 \item tree map
 \begin{textblock*}{150mm}(4cm,-2cm)
-\includegraphics[width=0.5\linewidth]{./TreeTypes.eps}
+\includegraphics[width=0.5\linewidth]{./TreeTypes.png}
 \end{textblock*}
 \end{itemize}
 
 \end{frame}
 
-\subsection{Radial Layout}
+\subsection{Radiales Layout}
 \begin{frame}
-\frametitle{Radial Layout}
+\frametitle{Radiales Layout}
 
 \begin{itemize}
 \item Bessere Nutzung der Fläche durch radiales Layout
@@ -96,6 +96,14 @@ Compound Graph Bestandteile:
 \item Anzahl an Kindern auf allen Leveln
 \end{itemize}
 
+\begin{figure}
+\centering
+\includegraphics[width=0.79\linewidth]{./Compound_overview}
+\caption[Compound_overview]{Übersicht der Baum-/Graphenstruktur}
+\label{fig:Compound_overview}
+\end{figure}
+
+
 \framebreak
 \begin{itemize} 
 \item Pfad nur von Blatt zu Blatt
@@ -104,21 +112,41 @@ Compound Graph Bestandteile:
 \item Zufallsgenerierung: \#Level, \#Knoten, \#avg. Kinder, \#Links
 \end{itemize}
 
-%Übersichtsbild der Klassen einfügen
+
+\begin{figure}
+\centering
+\includegraphics[width=0.9\linewidth]{./UML_tree}
+\caption[UML Klassen]{UML Klassendiagramm}
+\label{fig:UML_tree}
+\end{figure}
 
 \end{frame}
 
 
-\section{Radial Layout}
+\section{Radiales Layout}
 \begin{frame}
-\frametitle{Radial Layout}
+\frametitle{Radiales Layout}
 
-\begin{itemize}
-\item Bessere Nutzung der Fläche durch radiales Layout
-\item Level bilden "Kreisringe", Wurzel ist Mittelpunkt
-\item Anzahl aller Kinder bestimmt konzentrisch Position auf Ring 
-\\ und bildet Sektor (alle weiteren Kinder innerhalb)
-\end{itemize}
+\begin{center}
+Anzahl aller Kinder bestimmt konzentrisch Position auf Ring 
+\\ und bildet Sektor (alle weiteren Kinder innerhalb)\\
+\end{center}
+
+\begin{align}
+\theta = \frac{\theta_{min} + \theta_{max}}{2} * \frac{\pi}{180} 
+\end{align}
+\begin{align}
+x = radius * \sin(\theta) * level
+\\
+y = radius * \cos(\theta) * level
+\end{align} 
+rekursiv für alle [0..i..n] Kinder $c$ unter Knoten $k$:
+\begin{align}
+\theta_{tempMin} = \theta_{tempMax}
+\\
+\theta_{tempMax} = \theta_{tempMin} + (\theta_{max}-\theta_{min}) \\
+\theta_{tempMax} = \theta_{tempMax} * \frac{\Sigma(Kinder_{c[i]})+1}{\Sigma(Kinder_k)}
+\end{align}
 
 %Michis Formel einfügen (sin...cos...)
 %Bild einfügen
@@ -159,7 +187,7 @@ x = 5 + 4
 \item $C^2$ stetig an den Verbindungsstellen
 \end{itemize}
 \begin{textblock*}{100mm}(6.5cm,-2cm)
-\includegraphics[width=0.5\linewidth]{./B-spline_curve.eps}
+\includegraphics[width=0.5\linewidth]{./B-spline_curve.png}
 \end{textblock*}
 \end{frame}
 
@@ -167,22 +195,22 @@ x = 5 + 4
 \section{Der Algorithmus}
 \begin{frame}
 \frametitle{Skizze des Algorithmus}
-\includegraphics[scale=0.35]{./Algorithm_Scheme.eps}
+\includegraphics[scale=0.35]{./Algorithm_Scheme.png}
 \end{frame}
 
 \begin{frame}
 \frametitle{Ergebnis des Algorithmus}
-\includegraphics[scale=0.35]{./Algorithm_Result.eps}
+\includegraphics[scale=0.35]{./Algorithm_Result.png}
 \end{frame}
 
 \begin{frame}
 \frametitle{Anwendung auf anderes Layout}
-\includegraphics[scale=0.35]{./Algorithm_Result_OtherLayout.eps}
+\includegraphics[scale=0.35]{./Algorithm_Result_OtherLayout.png}
 \end{frame}
 
 \begin{frame}
 \frametitle{Kontrolle der Splines - Beta Faktor}
-\includegraphics[scale=0.35]{./Algorithm_BetaFactor_Results.eps}
+\includegraphics[scale=0.35]{./Algorithm_BetaFactor_Results.png}
 \begin{itemize}
 \bigskip
 \item $\beta$-Faktor steuert Anschmiegen der Splines an Kontrollpolygon
@@ -193,7 +221,7 @@ x = 5 + 4
 
 \begin{frame}
 \frametitle{Interaktionsmöglichkeiten zur Datenexploration}
-\includegraphics[scale=0.30]{./Algorithm_Interaction.eps}
+\includegraphics[scale=0.30]{./Algorithm_Interaction.png}
 \end{frame}
 
 \section{Technnisches System}
@@ -202,11 +230,12 @@ x = 5 + 4
 
 \begin{itemize}
 \item Cross-platform: gestestet unter Windows 8, Ubuntu 14.04
-\item Cmake als build-tool
+\item Cmake als build-tool für C++ Code
 \item OpenGL(GLUT, GLEW) als plattformunabhängige  
 \\ Anbindung an Grafikkarte -> schnell(GPU beschleunigt) 
 \item Erzeugung des Graphen auf CPU
 \item Berechnung der Splines, Rendering auf GPU (Shader)
+\item Git als Versionskontrolle und issue tracker
 \end{itemize}
 
 \end{frame}
@@ -229,6 +258,9 @@ Es folgt eine kurze Demonstration unserer Ergebnisse
 \begin{itemize}
 \item Datenexploration...
 \item Erweiterung: allgemeine Graphen (durch betweeness centrality)
+\item "Hierarchial edge bundles for general graphs" 
+\\(Yuntao Jia, Michael Garland and John C. Hart, 2009)
+%http://graphics.cs.illinois.edu/sites/default/files/edgebundles.pdf
 \end{itemize}
 
 \end{frame}
