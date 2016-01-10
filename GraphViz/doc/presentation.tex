@@ -12,7 +12,7 @@
 % add logo to the sections
 \addtobeamertemplate{frametitle}{}{%
 \begin{textblock*}{100mm}(.6\textwidth,-1.2cm)
-\includegraphics[width=0.5\linewidth]{./logo_inf_fak.png}
+\includegraphics[width=0.5\linewidth]{./logo_inf_fak.eps}
 \end{textblock*}}
 
 
@@ -68,7 +68,7 @@ Visualization of Adjacency Relations in Hierarchical Data
 \item balloon tree
 \item tree map
 \begin{textblock*}{150mm}(4cm,-2cm)
-\includegraphics[width=0.5\linewidth]{./TreeTypes.png}
+\includegraphics[width=0.5\linewidth]{./TreeTypes.eps}
 \end{textblock*}
 \end{itemize}
 
@@ -140,15 +140,61 @@ Compound Graph Bestandteile:
 
 \subsection{B-Splines}
 \begin{frame}
-\frametitle{B-Splines}
-
+\frametitle{B-Splines Allgemein}
 \begin{itemize}
-\item dummy
+\item lokaler Einfluss der Kontrollpunkte
+\item niedriger Polynomgrad auch bei vielen Kontrollpunkten
+\end{itemize}
+\begin{equation}
+x = 5 + 4
+\end{equation}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{B-Splines Beispiel}
+\begin{itemize}
+\item Kontrollpunkte $\mathbf{d}_0 \text{ bis } \mathbf{d}_5$
+\item 3 stückweise kubische Segmente
+\item $C^2$ stetig an den Verbindungsstellen
+\end{itemize}
+\begin{textblock*}{100mm}(6.5cm,-2cm)
+\includegraphics[width=0.5\linewidth]{./B-spline_curve.eps}
+\end{textblock*}
+\end{frame}
+
+
+\section{Der Algorithmus}
+\begin{frame}
+\frametitle{Skizze des Algorithmus}
+\includegraphics[scale=0.35]{./Algorithm_Scheme.eps}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ergebnis des Algorithmus}
+\includegraphics[scale=0.35]{./Algorithm_Result.eps}
+\end{frame}
+
+\begin{frame}
+\frametitle{Anwendung auf anderes Layout}
+\includegraphics[scale=0.35]{./Algorithm_Result_OtherLayout.eps}
+\end{frame}
+
+\begin{frame}
+\frametitle{Kontrolle der Splines - Beta Faktor}
+\includegraphics[scale=0.35]{./Algorithm_BetaFactor_Results.eps}
+\begin{itemize}
+\bigskip
+\item $\beta$-Faktor steuert Anschmiegen der Splines an Kontrollpolygon
+\item hoher $\beta$-Faktor $\rightarrow$ starke Bündelung
 \end{itemize}
 
 \end{frame}
 
-
+\begin{frame}
+\frametitle{Interaktionsmöglichkeiten zur Datenexploration}
+\includegraphics[scale=0.30]{./Algorithm_Interaction.eps}
+\end{frame}
 
 \section{Technnisches System}
 \begin{frame}
