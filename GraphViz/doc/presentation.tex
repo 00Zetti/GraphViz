@@ -8,6 +8,8 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{textpos}
+\usepackage{subcaption}
+\usepackage{wrapfig}
 
 % add logo to the sections
 \addtobeamertemplate{frametitle}{}{%
@@ -62,26 +64,45 @@ Visualization of Adjacency Relations in Hierarchical Data
 \subsection{Graphenstrukturen}
 \begin{frame}
 \frametitle{Graphenstrukturen}
-\begin{itemize}
-\item rooted tree
-\item radial tree
-\item balloon tree
-\item tree map
-\begin{textblock*}{150mm}(4cm,-2cm)
-\includegraphics[width=0.5\linewidth]{./TreeTypes.png}
-\end{textblock*}
-\end{itemize}
 
+\begin{figure}[c]
+ 
+\begin{subfigure}{0.25\linewidth}
+\includegraphics[width=\linewidth, height=2.5cm]{./HierachicalTree.png} 
+\caption{Rooted Tree}
+
+\end{subfigure}
+ \begin{subfigure}{0.25\linewidth}
+\includegraphics[width=\linewidth, height=2.5cm]{./BalloonTree.png}
+\caption{Balloon Tree}
+
+\end{subfigure}
+ \begin{subfigure}{0.25\linewidth}
+\includegraphics[width=\linewidth, height=2.5cm]{./TreeMap.png}
+\caption{Tree Map}
+\end{subfigure}
+\end{figure}
 \end{frame}
 
 \subsection{Radiales Layout}
 \begin{frame}
 \frametitle{Radiales Layout}
+\begin{figure}
+\centering
+\includegraphics[width=0.6\linewidth]{./TreeTypes.png}
+\end{figure}
+\end{frame}
 
+\section{Splines}
+\begin{frame}
+\frametitle{Splines}
+\includegraphics[width=0.6\linewidth]{./Splines.png}
 \begin{itemize}
-\item Bessere Nutzung der Fläche durch radiales Layout
-\item Level bilden "Kreisringe", Wurzel ist Mittelpunkt
+\item stückweise polynomiale Funktion
+\item Interpolation bzw. Approximieren zwischen Punkten
+\item Beschreibung von Kurven
 \end{itemize}
+
 \end{frame}
 
 \section{Compound Graph}
@@ -161,15 +182,7 @@ rekursiv für alle [0..i..n] Kinder $c$ unter Knoten $k$:
 \end{frame}
 
 
-\section{Splines}
-\begin{frame}
-\frametitle{Splines}
 
-\begin{itemize}
-\item dummy splines allgemein
-\end{itemize}
-
-\end{frame}
 
 
 
