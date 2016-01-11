@@ -1,9 +1,9 @@
-#version 430 core
+#version 130
 
-layout(location = 0) in vec2 vertexPosition;
-layout(location = 1) in vec4 controlPoints;
-layout(location = 2) in float t;
-layout(location = 3) in float opacity;
+in vec2 vertexPosition;
+in vec4 controlPoints;
+in float t;
+in float opacity;
 
 uniform float beta;
 uniform float maxLength;

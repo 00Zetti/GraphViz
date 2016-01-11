@@ -1,6 +1,6 @@
-#version 430 core
+#version 130
 
-layout(location = 0) in vec2 vertexPosition;
+in vec2 vertexPosition;
 
 out vec3 color;
 
