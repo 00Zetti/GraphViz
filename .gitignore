@@ -31,6 +31,9 @@
 GraphViz/build/
 /build-GraphViz-Desktop_Qt_5_5_1_GCC_64bit-Default/
 
+# Generated config header
+GraphViz/include/config.h
+
 # tex files
 *.aux
 *.glo
