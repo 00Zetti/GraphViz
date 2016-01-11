@@ -717,9 +717,10 @@ GLuint Renderer::createShader(const std::string &source,GLenum shaderType)
 
     std::string shaderDir(VIZ_DIR);
 
-    const char* shaderSource = readFile(shaderDir+source).c_str();
+    string shaderSource = readFile(shaderDir+source);
+    const char* shaderSourceCStr = shaderSource.c_str();
 
-    glShaderSource(shader,1,&shaderSource,NULL);
+    glShaderSource(shader,1,&shaderSourceCStr,NULL);
     glCompileShader(shader);
     checkShader(shader,source);
 
