@@ -709,6 +709,19 @@ void Renderer::checkShader(GLuint shader,const std::string &name)
     {
         std::cout << "successfully compiled vertex shader." << name <<  std::endl;
     }
+
+    int log_len = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_len);
+
+    if (log_len > 1)
+    {
+        char *log = (char*)calloc(log_len, 1);
+        int chars_written = 0;
+
+        glGetShaderInfoLog(shader, log_len, &chars_written, log);
+        std::cout << log << endl;
+        free(log);
+    }
 }
 
 GLuint Renderer::createShader(const std::string &source,GLenum shaderType)
@@ -735,6 +748,21 @@ GLuint Renderer::createProgram(GLuint vertexShader, GLuint fragmentShader)
     glAttachShader(program,fragmentShader);
 
     glLinkProgram(program);
+
+    {
+        int log_len = 0;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_len);
+
+        if (log_len > 1)
+        {
+            char *log = (char*)calloc(log_len, 1);
+            int chars_written = 0;
+
+            glGetProgramInfoLog(program, log_len, &chars_written, log);
+            printf("%s\n", log);
+            free(log);
+        }
+    }
 
     glDetachShader(program,vertexShader);
     glDetachShader(program,fragmentShader);
