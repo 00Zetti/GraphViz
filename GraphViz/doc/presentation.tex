@@ -180,17 +180,23 @@ rekursiv für alle [0..i..n] Kinder $c$ unter Knoten $k$:
 \item lokaler Einfluss der Kontrollpunkte
 \item niedriger Polynomgrad auch bei vielen Kontrollpunkten
 \end{itemize}
+\bigskip
 \begin{equation}
-x = 5 + 4
+N_{i,1}(t) = \begin{cases}
+                1 & \text{für } t_{i} \leq t < t_{i+1} \\
+                0 & \text{sonst}
+             \end{cases}
 \end{equation}
-
+\begin{equation}
+N_{i,k}(t) = \frac{t - t_{i}}{t_{i+k-1} - t_{i}}N_{i,k-1}(t) + \frac{t_{i+k} - t}{t_{i+k} - t_{i+1}}N_{i+1,k-1}(t)
+\end{equation}
 \end{frame}
 
 \begin{frame}
 \frametitle{B-Splines Beispiel}
 \begin{itemize}
 \item Kontrollpunkte $\mathbf{d}_0 \text{ bis } \mathbf{d}_5$
-\item 3 stückweise kubische Segmente
+\item $n - 2$ stückweise kubische Segmente
 \item $C^2$ stetig an den Verbindungsstellen
 \end{itemize}
 \begin{textblock*}{100mm}(6.5cm,-2cm)
