@@ -54,7 +54,7 @@ bool Renderer::initGLUT(int &argc, char **argv, unsigned int width, unsigned int
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(mWidth,mHeight);
-    glutInitContextVersion(4,3);
+    glutInitContextVersion(3, 1);
     glutInitContextProfile(GLUT_CORE_PROFILE);
     glutCreateWindow("GraphViz");
 
@@ -709,6 +709,19 @@ void Renderer::checkShader(GLuint shader,const std::string &name)
     {
         std::cout << "successfully compiled vertex shader." << name <<  std::endl;
     }
+
+    int log_len = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_len);
+
+    if (log_len > 1)
+    {
+        char *log = (char*)calloc(log_len, 1);
+        int chars_written = 0;
+
+        glGetShaderInfoLog(shader, log_len, &chars_written, log);
+        std::cout << log << endl;
+        free(log);
+    }
 }
 
 GLuint Renderer::createShader(const std::string &source,GLenum shaderType)
@@ -717,9 +730,10 @@ GLuint Renderer::createShader(const std::string &source,GLenum shaderType)
 
     std::string shaderDir(VIZ_DIR);
 
-    const char* shaderSource = readFile(shaderDir+source).c_str();
+    string shaderSource = readFile(shaderDir+source);
+    const char* shaderSourceCStr = shaderSource.c_str();
 
-    glShaderSource(shader,1,&shaderSource,NULL);
+    glShaderSource(shader,1,&shaderSourceCStr,NULL);
     glCompileShader(shader);
     checkShader(shader,source);
 
@@ -734,6 +748,21 @@ GLuint Renderer::createProgram(GLuint vertexShader, GLuint fragmentShader)
     glAttachShader(program,fragmentShader);
 
     glLinkProgram(program);
+
+    {
+        int log_len = 0;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_len);
+
+        if (log_len > 1)
+        {
+            char *log = (char*)calloc(log_len, 1);
+            int chars_written = 0;
+
+            glGetProgramInfoLog(program, log_len, &chars_written, log);
+            printf("%s\n", log);
+            free(log);
+        }
+    }
 
     glDetachShader(program,vertexShader);
     glDetachShader(program,fragmentShader);
