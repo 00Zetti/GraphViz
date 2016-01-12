@@ -62,23 +62,32 @@
 \headcommand {\beamer@framepages {20}{20}}
 \headcommand {\slideentry {6}{0}{7}{21/21}{}{0}}
 \headcommand {\beamer@framepages {21}{21}}
-\headcommand {\sectionentry {7}{Technnisches System}{22}{Technnisches System}{0}}
+\headcommand {\sectionentry {7}{Technisches System}{22}{Technisches System}{0}}
 \headcommand {\beamer@sectionpages {17}{21}}
 \headcommand {\beamer@subsectionpages {17}{21}}
 \headcommand {\slideentry {7}{0}{8}{22/22}{}{0}}
 \headcommand {\beamer@framepages {22}{22}}
-\headcommand {\sectionentry {8}{Demo}{23}{Demo}{0}}
+\headcommand {\sectionentry {8}{Umsetzung}{23}{Umsetzung}{0}}
 \headcommand {\beamer@sectionpages {22}{22}}
 \headcommand {\beamer@subsectionpages {22}{22}}
 \headcommand {\slideentry {8}{0}{9}{23/23}{}{0}}
 \headcommand {\beamer@framepages {23}{23}}
-\headcommand {\sectionentry {9}{Nutzen und Erweiterung}{24}{Nutzen und Erweiterung}{0}}
-\headcommand {\beamer@sectionpages {23}{23}}
-\headcommand {\beamer@subsectionpages {23}{23}}
-\headcommand {\slideentry {9}{0}{10}{24/24}{}{0}}
+\headcommand {\slideentry {8}{0}{10}{24/24}{}{0}}
 \headcommand {\beamer@framepages {24}{24}}
-\headcommand {\beamer@partpages {1}{24}}
-\headcommand {\beamer@subsectionpages {24}{24}}
-\headcommand {\beamer@sectionpages {24}{24}}
-\headcommand {\beamer@documentpages {24}}
-\headcommand {\def \inserttotalframenumber {24}}
+\headcommand {\slideentry {8}{0}{11}{25/25}{}{0}}
+\headcommand {\beamer@framepages {25}{25}}
+\headcommand {\sectionentry {9}{Demo}{26}{Demo}{0}}
+\headcommand {\beamer@sectionpages {23}{25}}
+\headcommand {\beamer@subsectionpages {23}{25}}
+\headcommand {\slideentry {9}{0}{12}{26/26}{}{0}}
+\headcommand {\beamer@framepages {26}{26}}
+\headcommand {\sectionentry {10}{Nutzen und Erweiterung}{27}{Nutzen und Erweiterung}{0}}
+\headcommand {\beamer@sectionpages {26}{26}}
+\headcommand {\beamer@subsectionpages {26}{26}}
+\headcommand {\slideentry {10}{0}{13}{27/27}{}{0}}
+\headcommand {\beamer@framepages {27}{27}}
+\headcommand {\beamer@partpages {1}{27}}
+\headcommand {\beamer@subsectionpages {27}{27}}
+\headcommand {\beamer@sectionpages {27}{27}}
+\headcommand {\beamer@documentpages {27}}
+\headcommand {\def \inserttotalframenumber {27}}

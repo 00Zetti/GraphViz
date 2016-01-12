@@ -20,7 +20,7 @@
 
 \setbeamertemplate{footline}[frame number]
 
-\author{Größler, Hofmann, Zettwitz, Sopauschke, Sturm, Solovjova}
+\author{Größler, Hofmann, Solovjova, Sopauschke, Sturm, Zettwitz}
 \title{A Visualization Technique for \\  Hierarchical Edge Bundles}
 \date{14.Januar 2016} 
 %\setbeamercovered{transparent}  
@@ -250,7 +250,7 @@ N_{i,k}(t) = \frac{t - t_{i}}{t_{i+k-1} - t_{i}}N_{i,k-1}(t) + \frac{t_{i+k} - t
 \includegraphics[scale=0.30]{./Algorithm_Interaction.png}
 \end{frame}
 
-\section{Technnisches System}
+\section{Technisches System}
 \begin{frame}
 \frametitle{Technisches System}
 
@@ -266,7 +266,47 @@ N_{i,k}(t) = \frac{t - t_{i}}{t_{i+k-1} - t_{i}}N_{i,k-1}(t) + \frac{t_{i+k} - t
 
 \end{frame}
 
+\section{Umsetzung}
+\begin{frame}
+\frametitle{Umsetzung}
 
+\begin{itemize}
+\item zufällige Generierung des Baumes und der Verbindungen
+\item Erstellen des radialen Layouts
+\item Generieren der Splines
+\item Senden aller relevanten Daten an GPU
+\item $\beta$-Parameter Manipulation in Shader
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Shader I}
+\begin{itemize}
+\item benötigte Daten: 	
+	\begin{itemize}
+	\item Splinepunkte
+	\item $t \in[0,1]$ für Splinepunkt
+	\item Länge des Pfades $l_t$
+	\item Anfangs-, Endpunkt(für $\beta$)
+	\item Farbe von Anfangs-,Endpunkt
+	\item $\alpha$-Werte für Blending
+	\item $\beta$
+	\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Shader II}
+\begin{itemize}
+\item Bestimmung der endgültigen Splineposition durch lineare Interpolation in $\beta$\\
+$S`(t)=\beta S(t) + (1-\beta)(P_0 + t(P_{N-1} - P_0))$
+
+\item Bestimmung der Farbe durch lineare Interpolation in $t$ und $l$
+$color =(1-t) color_{begin} + t color_{end}$
+$opacity = \alpha_{min} \frac{l_t-l_{min}}{l_{max}-l_{min}} + \alpha_{max} (1-\frac{l_t-l_{min}}{l_{max}-l_{min}})$
+\end{itemize}
+\end{frame}
 
 \section{Demo}
 \begin{frame}
@@ -286,7 +326,7 @@ Es folgt eine kurze Demonstration unserer Ergebnisse
 \item visuell ansprechend
 \item Erweiterung:
 \begin{itemize} 
-\item allgemeine Graphen (durch betweeness centrality)
+\item allgemeine Graphen (durch betweenness centrality)
 \item "Hierarchial edge bundles for general graphs" 
 \\(Yuntao Jia, Michael Garland and John C. Hart, 2009)
 %http://graphics.cs.illinois.edu/sites/default/files/edgebundles.pdf
