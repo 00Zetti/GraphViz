@@ -105,11 +105,12 @@ Visualization of Adjacency Relations in Hierarchical Data
 \end{frame}
 
 \subsection{B-Splines}
+
 \begin{frame}
 \frametitle{B-Splines Allgemein}
 \begin{itemize}
-\item lokaler Einfluss der Kontrollpunkte
-\item niedriger Polynomgrad auch bei vielen Kontrollpunkten
+\item Gegeben sind $n+1$ Kontrollpunkte $\mathbf{d}_0 \text{,}\dots\text{,} \mathbf{d}_n$
+\item und ein Knotenvektor $t_0\text{,} t_1\text{,} \dots \text{,} t_{n+k}$
 \end{itemize}
 \bigskip
 \begin{equation}
@@ -121,17 +122,32 @@ N_{i,1}(t) = \begin{cases}
 \begin{equation}
 N_{i,k}(t) = \frac{t - t_{i}}{t_{i+k-1} - t_{i}}N_{i,k-1}(t) + \frac{t_{i+k} - t}{t_{i+k} - t_{i+1}}N_{i+1,k-1}(t)
 \end{equation}
+\bigskip
+\begin{equation}
+\boxed{\mathbf{x}(t) = \sum_{i = 0}^{n} N_{i,k}(t) \cdot \mathbf{d}_{i}}
+\end{equation}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{B-Splines Vorteile}
+\begin{itemize}
+\item Lokaler Einfluss der Kontrollpunkte
+\item Niedriger Polynomgrad auch bei vielen Kontrollpunkten
+\item Einfügen eines neuen Kontrollpunktes ändert Grad der Kurvensegmente nicht
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{B-Splines Beispiel}
 \begin{itemize}
 \item Kontrollpunkte $\mathbf{d}_0 \text{ bis } \mathbf{d}_5$
-\item $n - 2$ stückweise kubische Segmente
-\item $C^2$ stetig an den Verbindungsstellen
+\item $n - 2$ Teilkurven
+\item jeweils stückweise kubisch
 \end{itemize}
-\begin{textblock*}{100mm}(6.5cm,-2cm)
-\includegraphics[width=0.5\linewidth]{./B-spline_curve.png}
+\begin{textblock*}{100mm}(5.5cm,-2cm)
+\includegraphics[width=0.6\linewidth]{./B-spline_curve.png}
 \end{textblock*}
 \end{frame}
 
