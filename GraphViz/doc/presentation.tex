@@ -51,7 +51,7 @@
 \end{frame}
 
 \section{Verwendetes Paper}
-\begin{frame}[allowframebreaks]
+\begin{frame}
 \frametitle{Verwendetes Paper}
 \begin{itemize} 
 \item Hierarchical Edge Bundles: \\
@@ -95,13 +95,16 @@ Visualization of Adjacency Relations in Hierarchical Data
 
 \subsection{Splines}
 \begin{frame}
-\frametitle{Splines}
-\includegraphics[width=0.6\linewidth]{./Splines.png}
+\frametitle{Splines}\centering
+\includegraphics[width=0.6\linewidth]{./CreatedSpline.png}
 \begin{itemize}
-\item stückweise polynomiale Funktion
 \item Interpolation bzw. Approximieren zwischen Punkten
 \item Beschreibung von Kurven
+\item stückweise polynomiale Funktion: 
 \end{itemize}
+\begin{equation} 
+\boxed{\mathbf{x}(t) = \sum_{i = 0}^{n} B_{i}(t) \cdot \mathbf{p}_{i}}
+\end{equation}
 \end{frame}
 
 \subsection{B-Splines}
@@ -109,7 +112,7 @@ Visualization of Adjacency Relations in Hierarchical Data
 \begin{frame}
 \frametitle{B-Splines Allgemein}
 \begin{itemize}
-\item Gegeben sind $n+1$ Kontrollpunkte $\mathbf{d}_0 \text{,}\dots\text{,} \mathbf{d}_n$
+\item Gegeben sind $n+1$ Kontrollpunkte $\mathbf{d}_0 \text{,}\dots\text{,} \mathbf{b}_n$
 \item und ein Knotenvektor $t_0\text{,} t_1\text{,} \dots \text{,} t_{n+k}$
 \end{itemize}
 \bigskip
