@@ -62,3 +62,4 @@ GraphViz/include/config.h
 build/
 GraphViz-build/
 GraphViz/doc/Thumbs.db
+/.project
