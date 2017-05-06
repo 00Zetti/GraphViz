@@ -3,17 +3,56 @@ A repository for our scientific seminar 'Applied Visualization and Analysis of m
 
 ## Getting Started
 
+Move to the directory that contains `CMakeLists.txt`:
+```sh
+$ cd GraphViz
+```
+
+Create `build` directory and move there:
+```sh
+$ mkdir build
+$ cd build
+```
+
+Run CMake:
+```sh
+$ cmake -G "Unix Makefiles" ..
+```
+
 Build:
 ```sh
 $ make
 ```
 
-Build and run:
+Run:
 ```sh
-$ make run
+$ ./GraphViz
 ```
 
-Build from scratch:
+## Libraries
+
+OpenGL should be available on your PC already
+
+Building on a Linux System:
+
+FreeGlut:
 ```sh
-$ make clean && make
+$ sudo apt-get install build-essential freeglut3-dev
 ```
+
+GLEW:
+```sh
+$ sudo apt-get install libglew-dev
+```
+
+Building on a Windows System:
+
+Download Freeglut and GLEW from available sources:
+
+Freeglut : 	http://freeglut.sourceforge.net/index.php#download
+GLEW : 		http://glew.sourceforge.net/
+
+while running CMake, specify your pathes to LIB and INCLUDE directories.
+
+## LaTeX
+If some packages are missing - just install the missing packages or easily the whole "texlive-full" package(Ubuntu).
